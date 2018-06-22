@@ -9710,9 +9710,12 @@ remote_verify_memory (struct target_ops *ops,
       /* Make sure the remote is pointing at the right process.  */
       set_general_process ();
 
-      /* FIXME: assumes lma can fit into long.  */
-      xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
-		 (long) lma, (long) size);
+      if ((sizeof (CORE_ADDR) == 8) && (sizeof (long) == 4))
+	      xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%llx,%llx",
+		      lma, size);
+      else
+	       xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
+		       (long) lma, (long) size);
       putpkt (rs->buf);
 
       /* Be clever; compute the host_crc before waiting for target

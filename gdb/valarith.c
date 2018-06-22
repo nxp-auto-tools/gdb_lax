@@ -50,11 +50,14 @@ find_size_for_pointer_math (struct type *ptr_type)
 {
   LONGEST sz = -1;
   struct type *ptr_target;
+  int unit_size2 = 1;
 
   gdb_assert (TYPE_CODE (ptr_type) == TYPE_CODE_PTR);
   ptr_target = check_typedef (TYPE_TARGET_TYPE (ptr_type));
+  unit_size2 = gdbarch_adjust_addressable_memory_unit_size (target_gdbarch (), 0,
+        gdbarch_addressable_memory_unit_size (target_gdbarch ()));
 
-  sz = type_length_units (ptr_target);
+  sz = type_length_units (ptr_target)/unit_size2;
   if (sz == 0)
     {
       if (TYPE_CODE (ptr_type) == TYPE_CODE_VOID)

@@ -642,7 +642,9 @@ vax-*-*)
 	# Target: VAX
 	gdb_target_obs="vax-tdep.o"
 	;;
-
+vspa-*-elf)
+	gdb_target_obs="vspa-tdep.o"
+	;;
 x86_64-*-darwin*)
 	# Target: Darwin/x86-64
 	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o \

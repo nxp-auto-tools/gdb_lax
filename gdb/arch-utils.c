@@ -191,6 +191,30 @@ default_make_symbol_special (struct symbol *sym, struct objfile *objfile)
 /* See arch-utils.h.  */
 
 CORE_ADDR
+default_adjust_dwarf2_data_uoffset (CORE_ADDR uoffset)
+{
+  return uoffset;
+}
+
+/* See arch-utils.h.  */
+
+int64_t
+default_adjust_dwarf2_data_offset (int64_t offset)
+{
+  return offset;
+}
+
+/* See arch-utils.h.  */
+
+CORE_ADDR
+default_adjust_dwarf2_data_addr (CORE_ADDR data_addr)
+{
+  return data_addr;
+}
+
+/* See arch-utils.h.  */
+
+CORE_ADDR
 default_adjust_dwarf2_addr (CORE_ADDR pc)
 {
   return pc;
@@ -902,6 +926,17 @@ default_addressable_memory_unit_size (struct gdbarch *gdbarch)
 {
   return 1;
 }
+
+/* Default method for gdbarch_addressable_memory_unit_size.  By default, a memory byte has
+   a size of 1 octet.  */
+
+int
+default_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size)
+{
+  return memory_unit_size;
+}
+
+
 
 void
 default_guess_tracepoint_registers (struct gdbarch *gdbarch,

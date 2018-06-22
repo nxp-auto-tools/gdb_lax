@@ -1641,6 +1641,7 @@ target_read (struct target_ops *ops,
 {
   LONGEST xfered_total = 0;
   int unit_size = 1;
+  int unit_size2 = 1;
 
   /* If we are reading from a memory object, find the length of an addressable
      unit for that architecture.  */
@@ -1648,7 +1649,11 @@ target_read (struct target_ops *ops,
       || object == TARGET_OBJECT_STACK_MEMORY
       || object == TARGET_OBJECT_CODE_MEMORY
       || object == TARGET_OBJECT_RAW_MEMORY)
-    unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+    {
+      unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+      unit_size2 = gdbarch_adjust_addressable_memory_unit_size (target_gdbarch (), offset,
+        gdbarch_addressable_memory_unit_size (target_gdbarch ()));
+    }
 
   while (xfered_total < len)
     {
@@ -1657,7 +1662,7 @@ target_read (struct target_ops *ops,
 
       status = target_read_partial (ops, object, annex,
 				    buf + xfered_total * unit_size,
-				    offset + xfered_total, len - xfered_total,
+				    offset + xfered_total/unit_size2, len - xfered_total,
 				    &xfered_partial);
 
       /* Call an observer, notifying them of the xfer progress?  */
@@ -1832,13 +1837,16 @@ read_memory_robust (struct target_ops *ops,
 {
   VEC(memory_read_result_s) *result = 0;
   int unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+  int unit_size2 = gdbarch_adjust_addressable_memory_unit_size ( target_gdbarch (),
+      offset, gdbarch_addressable_memory_unit_size (target_gdbarch ()));
+
   struct cleanup *cleanup = make_cleanup (free_memory_read_result_vector,
 					  &result);
 
   LONGEST xfered_total = 0;
   while (xfered_total < len)
     {
-      struct mem_region *region = lookup_mem_region (offset + xfered_total);
+       struct mem_region *region = lookup_mem_region (offset + xfered_total/unit_size2);
       LONGEST region_len;
 
       /* If there is no explicit region, a fake one should be created.  */
@@ -1865,15 +1873,15 @@ read_memory_robust (struct target_ops *ops,
 	  LONGEST xfered_partial =
 	      target_read (ops, TARGET_OBJECT_MEMORY, NULL,
 			   (gdb_byte *) buffer,
-			   offset + xfered_total, to_read);
+			    offset + xfered_total/unit_size2, to_read);
 	  /* Call an observer, notifying them of the xfer progress?  */
 	  if (xfered_partial <= 0)
 	    {
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
 	      do_cleanups (inner_cleanup);
-	      read_whatever_is_readable (ops, offset + xfered_total,
-					 offset + xfered_total + to_read,
+	      read_whatever_is_readable (ops, offset + xfered_total/unit_size2,
+					 offset + xfered_total/unit_size2 + to_read,
 					 unit_size, &result);
 	      xfered_total += to_read;
 	    }
@@ -1883,7 +1891,7 @@ read_memory_robust (struct target_ops *ops,
 
 	      discard_cleanups (inner_cleanup);
 	      r.data = buffer;
-	      r.begin = offset + xfered_total;
+	      r.begin = offset + xfered_total/unit_size2;
 	      r.end = r.begin + xfered_partial;
 	      VEC_safe_push (memory_read_result_s, result, &r);
 	      xfered_total += xfered_partial;
@@ -1908,6 +1916,7 @@ target_write_with_progress (struct target_ops *ops,
 {
   LONGEST xfered_total = 0;
   int unit_size = 1;
+  int unit_size2 = 1;
 
   /* If we are writing to a memory object, find the length of an addressable
      unit for that architecture.  */
@@ -1915,7 +1924,11 @@ target_write_with_progress (struct target_ops *ops,
       || object == TARGET_OBJECT_STACK_MEMORY
       || object == TARGET_OBJECT_CODE_MEMORY
       || object == TARGET_OBJECT_RAW_MEMORY)
-    unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+     {
+      unit_size = gdbarch_addressable_memory_unit_size (target_gdbarch ());
+      unit_size2 = gdbarch_adjust_addressable_memory_unit_size ( target_gdbarch (),
+        offset, gdbarch_addressable_memory_unit_size (target_gdbarch ()));
+     }
 
   /* Give the progress callback a chance to set up.  */
   if (progress)
@@ -1928,7 +1941,7 @@ target_write_with_progress (struct target_ops *ops,
 
       status = target_write_partial (ops, object, annex,
 				     buf + xfered_total * unit_size,
-				     offset + xfered_total, len - xfered_total,
+				     offset + xfered_total/unit_size2, len - xfered_total,
 				     &xfered_partial);
 
       if (status != TARGET_XFER_OK)

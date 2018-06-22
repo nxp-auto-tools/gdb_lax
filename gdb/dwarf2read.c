@@ -6979,7 +6979,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 				 built_actual_name != NULL,
 				 VAR_DOMAIN, LOC_STATIC,
 				 &objfile->global_psymbols,
-				 addr + baseaddr,
+				 gdbarch_adjust_dwarf2_data_addr (gdbarch, addr + baseaddr),
 				 cu->language, objfile);
 	}
       else
@@ -6998,7 +6998,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_STATIC,
 			       &objfile->static_psymbols,
-			       has_loc ? addr + baseaddr : (CORE_ADDR) 0,
+			       has_loc ?
+               gdbarch_adjust_dwarf2_data_addr (gdbarch, addr + baseaddr)
+               : (CORE_ADDR) 0,
 			       cu->language, objfile);
 	}
       break;
@@ -7222,6 +7224,13 @@ peek_die_abbrev (const gdb_byte *info_ptr, unsigned int *bytes_read,
   bfd *abfd = cu->objfile->obfd;
   unsigned int abbrev_number;
   struct abbrev_info *abbrev;
+  
+  /* Some compilers/assemblers do not emit an empty DIE at end of
+    compilation unit CU */
+  if (info_ptr >= (cu->per_cu->section->buffer +
+       cu->per_cu->offset.sect_off + cu->per_cu->length))
+    return NULL;
+
 
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, bytes_read);
 
@@ -7231,7 +7240,7 @@ peek_die_abbrev (const gdb_byte *info_ptr, unsigned int *bytes_read,
   abbrev = abbrev_table_lookup_abbrev (cu->abbrev_table, abbrev_number);
   if (!abbrev)
     {
-      error (_("Dwarf Error: Could not find abbrev number %d in %s"
+      warning (_("Dwarf Error: Could not find abbrev number %d in %s"
 	       " at offset 0x%x [in module %s]"),
 	     abbrev_number, cu->per_cu->is_debug_types ? "TU" : "CU",
 	     cu->header.offset.sect_off, bfd_get_filename (abfd));
@@ -15269,9 +15278,15 @@ read_full_die_1 (const struct die_reader_specs *reader,
 
   abbrev = abbrev_table_lookup_abbrev (cu->abbrev_table, abbrev_number);
   if (!abbrev)
+  {
+    *diep = NULL;
+    *has_children = 0;
+    return info_ptr;
+
     error (_("Dwarf Error: could not find abbrev number %d [in module %s]"),
 	   abbrev_number,
 	   bfd_get_filename (abfd));
+  }	   
 
   die = dwarf_alloc_die (cu, abbrev->num_attrs + num_extra_attrs);
   die->offset = offset;
@@ -18325,8 +18340,11 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
       unsigned int dummy;
 
       if (DW_BLOCK (attr)->data[0] == DW_OP_addr)
-	SYMBOL_VALUE_ADDRESS (sym) =
-	  read_address (objfile->obfd, DW_BLOCK (attr)->data + 1, cu, &dummy);
+	  {
+		SYMBOL_VALUE_ADDRESS (sym) =
+				gdbarch_adjust_dwarf2_data_addr (get_objfile_arch (objfile),
+						read_address (objfile->obfd, DW_BLOCK (attr)->data + 1, cu, &dummy));
+      }
       else
 	SYMBOL_VALUE_ADDRESS (sym) =
 	  read_addr_index_from_leb128 (cu, DW_BLOCK (attr)->data + 1, &dummy);

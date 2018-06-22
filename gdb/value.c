@@ -3120,6 +3120,8 @@ value_primitive_field (struct value *arg1, LONGEST offset,
   struct type *type;
   struct gdbarch *arch = get_value_arch (arg1);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
+  int unit_size2 = gdbarch_adjust_addressable_memory_unit_size (target_gdbarch (), offset,
+        gdbarch_addressable_memory_unit_size (target_gdbarch ()));
 
   arg_type = check_typedef (arg_type);
   type = TYPE_FIELD_TYPE (arg_type, fieldno);
@@ -3210,7 +3212,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
     {
       /* Plain old data member */
       offset += (TYPE_FIELD_BITPOS (arg_type, fieldno)
-	         / (HOST_CHAR_BIT * unit_size));
+	         / (HOST_CHAR_BIT * unit_size2));
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))

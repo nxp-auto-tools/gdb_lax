@@ -304,6 +304,7 @@
 #define EM_INTEL208	208	/* Reserved by Intel */
 #define EM_INTEL209	209	/* Reserved by Intel */
 #define EM_VISIUM	221	/* Controls and Data Services VISIUMcore processor */
+#define EM_VSPA	16584	/* Freescale VSPA */
 #define EM_FT32         222     /* FTDI Chip FT32 high performance 32-bit RISC architecture */
 #define EM_MOXIE        223     /* Moxie processor family */
 

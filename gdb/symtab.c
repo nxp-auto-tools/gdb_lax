@@ -6047,7 +6047,25 @@ producer_is_realview (const char *producer)
   return 0;
 }
 
-
+/* Return 1 if the supplied producer string matches the VSPA C Compiler. */
+
+int
+producer_is_vspa (const char *producer)
+{
+  static const char *const vspa_idents[] = {
+    "VSPA2 C Compiler"
+  };
+  int i;
+
+  if (producer == NULL)
+    return 0;
+
+  for (i = 0; i < ARRAY_SIZE (vspa_idents); i++)
+    if (startswith (producer, vspa_idents[i]))
+      return 1;
+
+  return 0;
+}
 
 /* The next index to hand out in response to a registration request.  */
 

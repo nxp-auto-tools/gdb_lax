@@ -717,7 +717,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	     index, not an address.  We don't support things like
 	     branching between the address and the TLS op.  */
 	  if (op_ptr >= op_end || *op_ptr != DW_OP_GNU_push_tls_address)
-	    result += ctx->offset;
+		{
+		  result += ctx->offset;
+		  result = gdbarch_adjust_dwarf2_data_addr (ctx->gdbarch, result);
+		}
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
@@ -735,52 +738,62 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_const1u:
 	  result = extract_unsigned_integer (op_ptr, 1, byte_order);
+	  result = gdbarch_adjust_dwarf2_data_uoffset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 1;
 	  break;
 	case DW_OP_const1s:
 	  result = extract_signed_integer (op_ptr, 1, byte_order);
+	  result = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 1;
 	  break;
 	case DW_OP_const2u:
 	  result = extract_unsigned_integer (op_ptr, 2, byte_order);
+	  result = gdbarch_adjust_dwarf2_data_uoffset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 2;
 	  break;
 	case DW_OP_const2s:
 	  result = extract_signed_integer (op_ptr, 2, byte_order);
+	  result = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 2;
 	  break;
 	case DW_OP_const4u:
 	  result = extract_unsigned_integer (op_ptr, 4, byte_order);
+	  result = gdbarch_adjust_dwarf2_data_uoffset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 4;
 	  break;
 	case DW_OP_const4s:
 	  result = extract_signed_integer (op_ptr, 4, byte_order);
+	  result = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 4;
 	  break;
 	case DW_OP_const8u:
 	  result = extract_unsigned_integer (op_ptr, 8, byte_order);
+	   result = gdbarch_adjust_dwarf2_data_uoffset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 8;
 	  break;
 	case DW_OP_const8s:
 	  result = extract_signed_integer (op_ptr, 8, byte_order);
+	  result = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  op_ptr += 8;
 	  break;
 	case DW_OP_constu:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  result = uoffset;
+	  result = gdbarch_adjust_dwarf2_data_uoffset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 	case DW_OP_consts:
 	  op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	  result = offset;
+	  result = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, result);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
@@ -921,6 +934,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    result = (ctx->funcs->read_addr_from_reg) (ctx->baton,
 						       op - DW_OP_breg0);
+		offset = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, offset);					   
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -930,6 +944,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    result = (ctx->funcs->read_addr_from_reg) (ctx->baton, reg);
+		offset = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, offset);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -960,7 +975,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    else
 	      error (_("Not implemented: computing frame "
 		       "base using explicit value operator"));
-	    result = result + offset;
+	    offset = gdbarch_adjust_dwarf2_data_offset (ctx->gdbarch, offset);
+	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	    in_stack_memory = 1;
 	    ctx->stack_len = before_stack_len;
@@ -1087,7 +1103,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		dwarf_require_integral (value_type (result_val));
 		result = value_as_long (result_val);
 		op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
-		result += reg;
+		result += gdbarch_adjust_dwarf2_data_uoffset (ctx->gdbarch, reg);
 		result_val = value_from_ulongest (address_type, result);
 		break;
 	      }

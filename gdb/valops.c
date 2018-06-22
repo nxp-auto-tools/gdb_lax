@@ -964,6 +964,8 @@ read_value_memory (struct value *val, LONGEST embedded_offset,
   ULONGEST xfered_total = 0;
   struct gdbarch *arch = get_value_arch (val);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
+  int unit_size2 = gdbarch_adjust_addressable_memory_unit_size (arch, memaddr,
+    gdbarch_addressable_memory_unit_size (arch));
   enum target_object object;
 
   object = stack ? TARGET_OBJECT_STACK_MEMORY : TARGET_OBJECT_MEMORY;
@@ -976,7 +978,7 @@ read_value_memory (struct value *val, LONGEST embedded_offset,
       status = target_xfer_partial (current_target.beneath,
 				    object, NULL,
 				    buffer + xfered_total * unit_size, NULL,
-				    memaddr + xfered_total,
+				    memaddr + xfered_total/unit_size2,
 				    length - xfered_total,
 				    &xfered_partial);
 
@@ -986,9 +988,9 @@ read_value_memory (struct value *val, LONGEST embedded_offset,
 	mark_value_bytes_unavailable (val, embedded_offset + xfered_total,
 				      xfered_partial);
       else if (status == TARGET_XFER_EOF)
-	memory_error (TARGET_XFER_E_IO, memaddr + xfered_total);
+	memory_error (TARGET_XFER_E_IO, memaddr + xfered_total/unit_size2);
       else
-	memory_error (status, memaddr + xfered_total);
+	memory_error (status, memaddr + xfered_total/unit_size2);
 
       xfered_total += xfered_partial;
       QUIT;

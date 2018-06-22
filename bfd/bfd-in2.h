@@ -2344,6 +2344,9 @@ enum bfd_architecture
 #define bfd_mach_nios2r2       2
   bfd_arch_visium,     /* Visium */
 #define bfd_mach_visium        1
+  bfd_arch_vspa,     /* Fresscale VSPA */
+#define bfd_mach_vspa1        0
+#define bfd_mach_vspa2        2
   bfd_arch_last
   };
 

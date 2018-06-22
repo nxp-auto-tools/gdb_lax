@@ -76,6 +76,18 @@ void default_coff_make_msymbol_special (int val, struct minimal_symbol *msym);
 
 void default_make_symbol_special (struct symbol *sym, struct objfile *objfile);
 
+/* Do nothing default implementation of gdbarch_adjust_dwarf2_data_uoffset.  */
+
+CORE_ADDR default_adjust_dwarf2_data_uoffset (CORE_ADDR uoffset);
+
+/* Do nothing default implementation of gdbarch_adjust_dwarf2_data_offset.  */
+
+int64_t default_adjust_dwarf2_data_offset (int64_t offset);
+
+/* Do nothing default implementation of gdbarch_adjust_dwarf2_data_addr.  */
+
+CORE_ADDR default_adjust_dwarf2_data_addr (CORE_ADDR data_addr);
+
 /* Do nothing default implementation of gdbarch_adjust_dwarf2_addr.  */
 
 CORE_ADDR default_adjust_dwarf2_addr (CORE_ADDR pc);
@@ -206,6 +218,7 @@ extern void default_infcall_munmap (CORE_ADDR addr, CORE_ADDR size);
 extern char *default_gcc_target_options (struct gdbarch *gdbarch);
 extern const char *default_gnu_triplet_regexp (struct gdbarch *gdbarch);
 extern int default_addressable_memory_unit_size (struct gdbarch *gdbarch);
+extern int default_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size);
 
 extern void default_guess_tracepoint_registers (struct gdbarch *gdbarch,
 						struct regcache *regcache,

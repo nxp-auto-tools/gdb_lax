@@ -1588,6 +1588,9 @@ extern struct block_symbol
    compiler (armcc).  */
 int producer_is_realview (const char *producer);
 
+/* Return 1 if the supplied producer string matches the VSPA C Compiler. */
+int producer_is_vspa (const char *producer);
+
 void fixup_section (struct general_symbol_info *ginfo,
 		    CORE_ADDR addr, struct objfile *objfile);
 

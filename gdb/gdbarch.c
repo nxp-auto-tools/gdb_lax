@@ -256,6 +256,9 @@ struct gdbarch
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
   gdbarch_make_symbol_special_ftype *make_symbol_special;
+  gdbarch_adjust_dwarf2_data_uoffset_ftype *adjust_dwarf2_data_uoffset;
+  gdbarch_adjust_dwarf2_data_offset_ftype *adjust_dwarf2_data_offset;
+  gdbarch_adjust_dwarf2_data_addr_ftype *adjust_dwarf2_data_addr;
   gdbarch_adjust_dwarf2_addr_ftype *adjust_dwarf2_addr;
   gdbarch_adjust_dwarf2_line_ftype *adjust_dwarf2_line;
   int cannot_step_breakpoint;
@@ -336,6 +339,7 @@ struct gdbarch
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
   gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size;
+  gdbarch_adjust_addressable_memory_unit_size_ftype *adjust_addressable_memory_unit_size;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -415,6 +419,9 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   gdbarch->make_symbol_special = default_make_symbol_special;
   gdbarch->adjust_dwarf2_addr = default_adjust_dwarf2_addr;
+  gdbarch->adjust_dwarf2_data_uoffset = default_adjust_dwarf2_data_uoffset;
+  gdbarch->adjust_dwarf2_data_offset = default_adjust_dwarf2_data_offset;
+  gdbarch->adjust_dwarf2_data_addr = default_adjust_dwarf2_data_addr;
   gdbarch->adjust_dwarf2_line = default_adjust_dwarf2_line;
   gdbarch->register_reggroup_p = default_register_reggroup_p;
   gdbarch->skip_permanent_breakpoint = default_skip_permanent_breakpoint;
@@ -441,6 +448,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->gcc_target_options = default_gcc_target_options;
   gdbarch->gnu_triplet_regexp = default_gnu_triplet_regexp;
   gdbarch->addressable_memory_unit_size = default_addressable_memory_unit_size;
+  gdbarch->adjust_addressable_memory_unit_size = default_adjust_addressable_memory_unit_size;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -688,6 +696,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
   /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
+  /* Skip verify of adjust_addressable_memory_unit_size, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -742,6 +751,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: addressable_memory_unit_size = <%s>\n",
                       host_address_to_string (gdbarch->addressable_memory_unit_size));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: adjust_addressable_memory_unit_size = <%s>\n",
+                      host_address_to_string (gdbarch->adjust_addressable_memory_unit_size));
+  fprintf_unfiltered (file, 
                       "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
                       gdbarch_adjust_breakpoint_address_p (gdbarch));
   fprintf_unfiltered (file,
@@ -3281,6 +3293,57 @@ set_gdbarch_make_symbol_special (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
+gdbarch_adjust_dwarf2_data_uoffset (struct gdbarch *gdbarch, CORE_ADDR uoffset)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->adjust_dwarf2_data_uoffset != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_adjust_dwarf2_data_uoffset called\n");
+  return gdbarch->adjust_dwarf2_data_uoffset (uoffset);
+}
+
+void
+set_gdbarch_adjust_dwarf2_data_uoffset (struct gdbarch *gdbarch,
+                                gdbarch_adjust_dwarf2_data_uoffset_ftype adjust_dwarf2_data_uoffset)
+{
+  gdbarch->adjust_dwarf2_data_uoffset = adjust_dwarf2_data_uoffset;
+}
+
+int64_t
+gdbarch_adjust_dwarf2_data_offset (struct gdbarch *gdbarch, int64_t offset)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->adjust_dwarf2_data_offset != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_adjust_dwarf2_data_offset called\n");
+  return gdbarch->adjust_dwarf2_data_offset (offset);
+}
+
+void
+set_gdbarch_adjust_dwarf2_data_offset (struct gdbarch *gdbarch,
+                                gdbarch_adjust_dwarf2_data_offset_ftype adjust_dwarf2_data_offset)
+{
+  gdbarch->adjust_dwarf2_data_offset = adjust_dwarf2_data_offset;
+}
+
+CORE_ADDR
+gdbarch_adjust_dwarf2_data_addr (struct gdbarch *gdbarch, CORE_ADDR data_addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->adjust_dwarf2_data_addr != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_adjust_dwarf2_data_addr called\n");
+  return gdbarch->adjust_dwarf2_data_addr (data_addr);
+}
+
+void
+set_gdbarch_adjust_dwarf2_data_addr (struct gdbarch *gdbarch,
+                                gdbarch_adjust_dwarf2_data_addr_ftype adjust_dwarf2_data_addr)
+{
+  gdbarch->adjust_dwarf2_data_addr = adjust_dwarf2_data_addr;
+}
+
+CORE_ADDR
 gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_assert (gdbarch != NULL);
@@ -4895,6 +4958,22 @@ set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch,
   gdbarch->addressable_memory_unit_size = addressable_memory_unit_size;
 }
 
+int
+gdbarch_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->adjust_addressable_memory_unit_size != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_adjust_addressable_memory_unit_size called\n");
+  return gdbarch->adjust_addressable_memory_unit_size (gdbarch, addr, memory_unit_size);
+}
+
+void
+set_gdbarch_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch,
+                                          gdbarch_adjust_addressable_memory_unit_size_ftype adjust_addressable_memory_unit_size)
+{
+  gdbarch->adjust_addressable_memory_unit_size = adjust_addressable_memory_unit_size;
+}
 
 /* Keep a registry of per-architecture data-pointers required by GDB
    modules.  */

@@ -752,7 +752,27 @@ extern void set_gdbarch_make_symbol_special (struct gdbarch *gdbarch, gdbarch_ma
    entry in a backend-specific way.  Normally this hook is supposed to
    return the address passed unchanged, however if that is incorrect for
    any reason, then this hook can be used to fix the address up in the
-   required manner.  This is currently used by the MIPS backend to make
+   required manner.  This is currently used by the VSPA backend to make
+   sure addresses in FDE, range records, etc. referring to compressed
+   code have the ISA bit set, matching line information and the symbol
+   table. */
+typedef CORE_ADDR (gdbarch_adjust_dwarf2_data_uoffset_ftype) (CORE_ADDR uoffset);
+extern CORE_ADDR gdbarch_adjust_dwarf2_data_uoffset (struct gdbarch *gdbarch, CORE_ADDR uoffset);
+extern void set_gdbarch_adjust_dwarf2_data_uoffset (struct gdbarch *gdbarch, gdbarch_adjust_dwarf2_data_uoffset_ftype *adjust_dwarf2_data_uoffset);
+
+typedef int64_t (gdbarch_adjust_dwarf2_data_offset_ftype) (int64_t offset);
+extern int64_t gdbarch_adjust_dwarf2_data_offset (struct gdbarch *gdbarch, int64_t offset);
+extern void set_gdbarch_adjust_dwarf2_data_offset (struct gdbarch *gdbarch, gdbarch_adjust_dwarf2_data_offset_ftype *adjust_dwarf2_data_offset);
+
+typedef CORE_ADDR (gdbarch_adjust_dwarf2_data_addr_ftype) (CORE_ADDR data_addr);
+extern CORE_ADDR gdbarch_adjust_dwarf2_data_addr (struct gdbarch *gdbarch, CORE_ADDR data_addr);
+extern void set_gdbarch_adjust_dwarf2_data_addr (struct gdbarch *gdbarch, gdbarch_adjust_dwarf2_data_addr_ftype *adjust_dwarf2_data_addr);
+
+/* Adjust the address retrieved from a DWARF-2 record other than a line
+   entry in a backend-specific way.  Normally this hook is supposed to
+   return the address passed unchanged, however if that is incorrect for
+   any reason, then this hook can be used to fix the address up in the
+   required manner.  This is currently used by the MIPS and VSPA backend to make
    sure addresses in FDE, range records, etc. referring to compressed
    code have the ISA bit set, matching line information and the symbol
    table. */
@@ -765,7 +785,7 @@ extern void set_gdbarch_adjust_dwarf2_addr (struct gdbarch *gdbarch, gdbarch_adj
    Normally this hook is supposed to return the address passed unchanged,
    however in the case of inconsistencies in these records, this hook can
    be used to fix them up in the required manner.  This is currently used
-   by the MIPS backend to make sure all line addresses in compressed code
+   by the MIPS and VSPA backend to make sure all line addresses in compressed code
    are presented with the ISA bit set, which is not always the case.  This
    in turn ensures breakpoint addresses are correctly matched against the
    stop PC. */
@@ -1521,6 +1541,10 @@ extern void set_gdbarch_gnu_triplet_regexp (struct gdbarch *gdbarch, gdbarch_gnu
 typedef int (gdbarch_addressable_memory_unit_size_ftype) (struct gdbarch *gdbarch);
 extern int gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch, gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size);
+
+typedef int (gdbarch_adjust_addressable_memory_unit_size_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size);
+extern int gdbarch_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size);
+extern void set_gdbarch_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, gdbarch_adjust_addressable_memory_unit_size_ftype *adjust_addressable_memory_unit_size);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
