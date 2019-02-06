@@ -969,7 +969,6 @@ read_value_memory (struct value *val, LONGEST embedded_offset,
   enum target_object object;
 
   object = stack ? TARGET_OBJECT_STACK_MEMORY : TARGET_OBJECT_MEMORY;
-
   while (xfered_total < length)
     {
       enum target_xfer_status status;
