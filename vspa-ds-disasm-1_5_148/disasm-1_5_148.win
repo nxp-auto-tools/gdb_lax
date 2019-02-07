@@ -1,0 +1,25 @@
+Freescale VSPA Disassembler  Version 1.5.148 2018-02-13
+VSPA1/VSPA2/VSPA3 Disassembly Library Version 1.32
+ADL Version VCPU1-1.68 IPPU1-1.6 VCPU2-1.42 IPPU2-1.6 VCPU3-1.33 IPPU3-1 
+Copyright NXP Semiconductors 2004-2017. All rights reserved.
+
+Usage: vspa-ds [-d] [-f] [-k<file>] [-i{l|b}{X}] [-l<hex address>] [-h<hex address>] [-j] [-m] [-n] [-p] [-r{i}] [-q] [-s] [-x] [-u] [-v] [-w] [-z] <srcfile>
+where:
+  -d  treat input file as memory dump (.lod file)
+  -b<label>  start at label   -e<label>  end at label
+  -f  print loop_end          -j do not disassemble BSS sections
+  -i{l|b}{X}  use interactive mode 
+	{l|b} specifies endianness of the input string 
+	X can be 2|4|8|16|32|64 and represents the number of AUs
+  -l<addr>  start at address  -h<addr>  end at address
+  -k<file>  config file       -p  suppress Pc display
+  -q  suppress banner         -s  suppress label and header display
+  -u  ignore relocation information
+  -v  version                 -x  display hex codification mixed with assembly
+  -z  display statistics      -n  display the unmangle C++ name 
+  -w  do not output local symbols when processing .eld files
+  -t  do not disassemble data sections -m suppress mapper labels
+  <srcfil>  assembled source file
+Library was successfully built for windows
+
+Static library was successfully built for windows
