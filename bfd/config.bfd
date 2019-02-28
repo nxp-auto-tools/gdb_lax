@@ -1715,6 +1715,7 @@ case "${targ}" in
 
   vspa-*-elf)
     targ_defvec=vspa_elf32_vec
+    want64=true
     ;;
 
   we32k-*-*)
