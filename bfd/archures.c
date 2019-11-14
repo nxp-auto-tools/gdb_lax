@@ -528,6 +528,7 @@ DESCRIPTION
 .  bfd_arch_vspa,	{* Freescale VSPA *}
 .#define bfd_mach_vspa1	0
 .#define bfd_mach_vspa2	2
+.#define bfd_mach_vspa3	3
 .  bfd_arch_last
 .  };
 */

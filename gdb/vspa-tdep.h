@@ -22,6 +22,7 @@
 
 extern struct target_desc *tdesc_vspa1;
 extern struct target_desc *tdesc_vspa2;
+extern struct target_desc *tdesc_vspa3;
 
 /* Register numbers of various important registers.  */
 

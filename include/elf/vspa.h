@@ -49,7 +49,9 @@ extern bfd_vma vspa_make_vcpu_pram_addr(bfd_vma addr);
 extern bfd_vma vspa_make_vcpu_dram_addr(bfd_vma addr);
 extern bfd_vma vspa_make_vcpu_ocram_addr(bfd_vma addr);
 extern int vspa_vcpu_dram(bfd_vma addr);
-#define VSPA_VMA_GET_DRAM_BIT_SIZE(x) ( (bfd_mach_vspa2 == x) ? 2 : 4 )
+extern bfd_vma  vspa_vma_get_dram_size(bfd_vma vspa_arch_type);
+//#define VSPA_VMA_GET_DRAM_BIT_SIZE(x) ( (bfd_mach_vspa2 == x)  ? 2 : 4 )
 #define ELF_EF_VSPA_CORE(f)       ( (f) & 0xffUL )
+
 
 #endif /* _ELF_VSPA_H */

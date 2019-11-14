@@ -335,7 +335,7 @@ vspa_elf_put_prefix_of_address(bfd_vma vspa_arch_type, bfd_vma addr, bfd_vma mem
       break;
     case 1:
       //kRUBY_RAWMEMSPACE_VCPU_DRAM
-      addr /= VSPA_VMA_GET_DRAM_BIT_SIZE (vspa_arch_type);
+      addr /= vspa_vma_get_dram_size (vspa_arch_type);
       break;
     case 2:
       //kRUBY_RAWMEMSPACE_IPPU_PRAM
@@ -343,7 +343,7 @@ vspa_elf_put_prefix_of_address(bfd_vma vspa_arch_type, bfd_vma addr, bfd_vma mem
       break;
     case 3:
       //kRUBY_RAWMEMSPACE_IPPU_DRAM
-      addr /= VSPA_VMA_GET_DRAM_BIT_SIZE (vspa_arch_type);
+      addr /= vspa_vma_get_dram_size (vspa_arch_type);
       break;
     case 4:
       //kRUBY_RAWMEMSPACE_OCRAM_DATA
@@ -373,7 +373,7 @@ vspa_elf_convert_word_address(bfd_vma vspa_arch_type, bfd_vma addr, bfd_vma mems
       break;
     case 1:
       //kRUBY_RAWMEMSPACE_VCPU_DRAM
-      addr *= VSPA_VMA_GET_DRAM_BIT_SIZE (vspa_arch_type);
+      addr *= vspa_vma_get_dram_size (vspa_arch_type);
       break;
     case 2:
       //kRUBY_RAWMEMSPACE_IPPU_PRAM
@@ -381,7 +381,7 @@ vspa_elf_convert_word_address(bfd_vma vspa_arch_type, bfd_vma addr, bfd_vma mems
       break;
     case 3:
       //kRUBY_RAWMEMSPACE_IPPU_DRAM
-      addr *= VSPA_VMA_GET_DRAM_BIT_SIZE (vspa_arch_type);
+      addr *= vspa_vma_get_dram_size (vspa_arch_type);
       break;
     case 4:
       //kRUBY_RAWMEMSPACE_OCRAM_DATA
@@ -493,6 +493,25 @@ static bfd_boolean vspa_set_section_contents(bfd *         abfd,
 
     return _bfd_generic_set_section_contents (abfd, section, location, offset, count);
 }
+
+bfd_vma  vspa_vma_get_dram_size(bfd_vma vspa_arch_type) {
+
+	switch (vspa_arch_type)
+	{
+	case bfd_mach_vspa3:
+		return 1;
+		break;
+
+	case bfd_mach_vspa2:
+		return 2;
+		break;
+
+	case bfd_mach_vspa1:
+		return 4;
+		break;
+	}
+}
+
 /* We use this to override swap_symbol_in.  */
 const struct elf_size_info elf32_vspa_size_info =
 {

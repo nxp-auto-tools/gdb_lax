@@ -35,6 +35,7 @@
 #include "vspa-tdep.h"
 #include "features/vspa2.c"
 #include "features/vspa1.c"
+#include "features/vspa3.c"
 #include "target.h"
 #include "objfiles.h"
 
@@ -42,6 +43,17 @@ extern "C" {
 #include "elf/vspa.h"
 }
 /* Return the name of register REGNUM.  */
+static char *vspa3_register_names[] =
+{
+  "g0", "g1", "g2", "g3", "g4",            /*  0  1  2  3  4 */
+  "g5", "g6", "g7", "g8", "g9",            /*  5  6  7  8  9 */
+  "g10", "g11", "a4", "a5", "a6",          /* 10 11 12 13 14 */
+  "a7", "a8", "a9", "a10", "a11",          /* 15 16 17 18 19 */
+  "a12", "a13", "a14", "a15", "a16",       /* 20 21 22 23 24 */
+  "a17", "a18", "a19", "a0",  "a1",        /* 25 26 27 28 29 */
+  "a2",  "a3",  "sp",  "pc"                /* 30 31 32 33 */
+};
+
 static char *vspa2_register_names[] =
 {
   "g0", "g1", "g2", "g3", "g4",            /*  0  1  2  3  4 */
@@ -64,6 +76,14 @@ static char *vspa1_register_names[] =
   "a2",  "a3",  "sp",  "pc"                /* 30 31 32 33 */
 };
 
+static const char *
+vspa3_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  if (regnum >= 0 && regnum < ARRAY_SIZE (vspa3_register_names))
+    return vspa3_register_names[regnum];
+
+  return NULL;
+}
 
 static const char *
 vspa2_register_name (struct gdbarch *gdbarch, int regnum)
@@ -471,6 +491,20 @@ vspa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static CORE_ADDR
+vspa3_adjust_dwarf2_data_uoffset (CORE_ADDR uoffset)
+{
+  uoffset /= 2;
+  return uoffset;
+}
+
+static int64_t
+vspa3_adjust_dwarf2_data_offset (int64_t offset)
+{
+  offset /= 1;
+  return offset;
+}
+
+static CORE_ADDR
 vspa2_adjust_dwarf2_data_uoffset (CORE_ADDR uoffset)
 {
   uoffset /= 2;
@@ -498,6 +532,18 @@ vspa1_adjust_dwarf2_data_offset (int64_t offset)
 }
 
 static CORE_ADDR
+vspa3_adjust_dwarf2_data_addr (CORE_ADDR data_addr)
+{
+  if (data_addr & 0xFFFFFFFF00000000ULL)
+    return data_addr;
+  else
+    if (data_addr < 0x7FFFFFFULL)
+      return vspa_elf_put_prefix_of_address (bfd_mach_vspa3, data_addr, kRUBY_RAWMEMSPACE_VCPU_DRAM);
+    else
+      return vspa_elf_put_prefix_of_address (bfd_mach_vspa3, data_addr, kRUBY_RAWMEMSPACE_OCRAM_DATA);
+}
+
+static CORE_ADDR
 vspa2_adjust_dwarf2_data_addr (CORE_ADDR data_addr)
 {
   if (data_addr & 0xFFFFFFFF00000000ULL)
@@ -519,6 +565,20 @@ vspa1_adjust_dwarf2_data_addr (CORE_ADDR data_addr)
       return vspa_elf_put_prefix_of_address (bfd_mach_vspa1, data_addr, kRUBY_RAWMEMSPACE_VCPU_DRAM);
     else
       return vspa_elf_put_prefix_of_address (bfd_mach_vspa1, data_addr, kRUBY_RAWMEMSPACE_OCRAM_DATA);
+}
+
+static CORE_ADDR
+vspa3_adjust_dwarf2_addr (CORE_ADDR pc)
+{
+  if (pc & 0xFFFFFFFF00000000ULL)
+    {
+      gdb_assert ((pc & 0xFFFFFFFF00000000ULL) == (kRUBY_RAWMEMSPACE_VCPU_PRAM_GDB<<32));
+      return pc;
+    }
+  else
+    {
+      return vspa_elf_put_prefix_of_address (bfd_mach_vspa3, pc, kRUBY_RAWMEMSPACE_VCPU_PRAM);
+    }
 }
 
 static CORE_ADDR
@@ -546,6 +606,27 @@ vspa1_adjust_dwarf2_addr (CORE_ADDR pc)
   else
     {
       return vspa_elf_put_prefix_of_address (bfd_mach_vspa1, pc, kRUBY_RAWMEMSPACE_VCPU_PRAM);
+    }
+}
+
+static CORE_ADDR
+vspa3_adjust_dwarf2_line (CORE_ADDR addr, int rel)
+{
+  if (rel == 0)
+    {
+      if (addr & 0xFFFFFFFF00000000ULL)
+      {
+    	  gdb_assert(FALSE);
+    	  return addr;
+      }
+      else
+    	  return vspa_elf_put_prefix_of_address (bfd_mach_vspa3, addr, kRUBY_RAWMEMSPACE_VCPU_PRAM);
+    }
+  else
+    {
+      CORE_ADDR rel_value = vspa_elf_put_prefix_of_address (bfd_mach_vspa3, addr, kRUBY_RAWMEMSPACE_VCPU_PRAM);
+      rel_value &= 0xFFFFFFFFULL;
+      return rel_value;
     }
 }
 
@@ -599,6 +680,14 @@ vspa_dwarf2_frame_adjust_return_address_reg (struct gdbarch *gdbarch,
 }
 
 static LONGEST
+vspa3_dwarf2_frame_adjust_offset (struct gdbarch *gdbarch, LONGEST offset)
+{
+  LONGEST offset_value = vspa_elf_put_prefix_of_address (bfd_mach_vspa3, offset, kRUBY_RAWMEMSPACE_VCPU_DRAM);
+  offset_value &= 0xFFFFFFFFULL;
+  return offset_value;
+}
+
+static LONGEST
 vspa2_dwarf2_frame_adjust_offset (struct gdbarch *gdbarch, LONGEST offset)
 {
   LONGEST offset_value = vspa_elf_put_prefix_of_address (bfd_mach_vspa2, offset, kRUBY_RAWMEMSPACE_VCPU_DRAM);
@@ -612,6 +701,12 @@ vspa1_dwarf2_frame_adjust_offset (struct gdbarch *gdbarch, LONGEST offset)
   LONGEST offset_value = vspa_elf_put_prefix_of_address (bfd_mach_vspa1, offset, kRUBY_RAWMEMSPACE_VCPU_DRAM);
   offset_value &= 0xFFFFFFFFULL;
   return offset_value;
+}
+
+static CORE_ADDR
+vspa3_dwarf2_frame_adjust_line (struct gdbarch *gdbarch, CORE_ADDR addr, int rel)
+{
+  return vspa3_adjust_dwarf2_line(addr, rel);
 }
 
 static CORE_ADDR
@@ -761,6 +856,26 @@ vspa_addressable_memory_unit_size (struct gdbarch *gdbarch)
 }
 
 static int
+vspa3_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size)
+{
+  if ((addr & (1ULL<<32)) == (1ULL<<32)) // VCPU_DRAM
+    return 1;
+  else
+    if ((addr & (2ULL<<32)) == (2ULL<<32)) // IPPU_PRAM
+      return 4;
+  else
+    if ((addr & (3ULL<<32)) == (3ULL<<32)) // IPPU_DRAM
+      return 2;
+  else
+    if ((addr & (4ULL<<32)) == (4ULL<<32)) // OCRAM_DATA
+      return 1;
+  else    if ((addr & (6ULL<<32)) == (6ULL<<32)) // VCPU_PRAM
+      return 4;
+
+  return 2;
+}
+
+static int
 vspa2_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size)
 {
   if ((addr & (1ULL<<32)) == (1ULL<<32)) // VCPU_DRAM
@@ -870,9 +985,11 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    /* Ensure we always have a target descriptor.  */
   if (!tdesc_has_registers (tdesc)) 
   {
-    if (mach == bfd_mach_vspa2)
+    if (mach == bfd_mach_vspa3)
+        tdesc = tdesc_vspa3;
+    else if(mach == bfd_mach_vspa2)
         tdesc = tdesc_vspa2;
-    else
+    else 
         tdesc = tdesc_vspa1;
    }
    
@@ -897,10 +1014,20 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     if (feature != NULL)
     {
         has_feature = 1;
-        // check validity for the gpr registers - these apply for both vspa1 and vspa2
+        // check validity for the gpr registers - these apply for all vspa versions
         for (i = 0; i < VSPA_NUM_REGS; i++)
            valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
                 vspa2_register_names[i]);
+    }
+
+    feature = tdesc_find_feature (tdesc, "vspa3-core-regs");
+    if (feature != NULL)
+    {
+        has_feature = 1;
+        // check validity for the gpr registers - these apply for all vspa versions
+        for (i = 0; i < VSPA_NUM_REGS; i++)
+           valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+                vspa3_register_names[i]);
     }
 
     if(!has_feature)
@@ -916,7 +1043,15 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, NULL);
 
-  if (mach == bfd_mach_vspa2) 
+  if (mach == bfd_mach_vspa3) 
+  {
+    set_gdbarch_adjust_dwarf2_data_uoffset (gdbarch, vspa3_adjust_dwarf2_data_uoffset);
+    set_gdbarch_adjust_dwarf2_data_offset (gdbarch, vspa3_adjust_dwarf2_data_offset);
+    set_gdbarch_adjust_dwarf2_data_addr (gdbarch, vspa3_adjust_dwarf2_data_addr);
+    set_gdbarch_adjust_dwarf2_addr (gdbarch, vspa3_adjust_dwarf2_addr);
+    set_gdbarch_adjust_dwarf2_line (gdbarch, vspa3_adjust_dwarf2_line);
+  }
+  else if (mach == bfd_mach_vspa2) 
   {
     set_gdbarch_adjust_dwarf2_data_uoffset (gdbarch, vspa2_adjust_dwarf2_data_uoffset);
     set_gdbarch_adjust_dwarf2_data_offset (gdbarch, vspa2_adjust_dwarf2_data_offset);
@@ -924,7 +1059,7 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_adjust_dwarf2_addr (gdbarch, vspa2_adjust_dwarf2_addr);
     set_gdbarch_adjust_dwarf2_line (gdbarch, vspa2_adjust_dwarf2_line);
   }
-  else 
+  else
   {
     set_gdbarch_adjust_dwarf2_data_uoffset (gdbarch, vspa1_adjust_dwarf2_data_uoffset);
     set_gdbarch_adjust_dwarf2_data_offset (gdbarch, vspa1_adjust_dwarf2_data_offset);
@@ -932,14 +1067,18 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_adjust_dwarf2_addr (gdbarch, vspa1_adjust_dwarf2_addr);
     set_gdbarch_adjust_dwarf2_line (gdbarch, vspa1_adjust_dwarf2_line);
   }
-  
   set_gdbarch_addr_bit (gdbarch, 36);
   set_gdbarch_ptr_bit (gdbarch, 36);
   set_gdbarch_dwarf2_addr_size (gdbarch, 4);
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VSPA_NUM_REGS);
-  if (mach == bfd_mach_vspa2) 
+  if (mach == bfd_mach_vspa3) 
+  {
+    set_gdbarch_register_name (gdbarch, vspa3_register_name);
+    set_tdesc_pseudo_register_name (gdbarch, vspa3_register_name);
+  }
+  else if (mach == bfd_mach_vspa2) 
   {
     set_gdbarch_register_name (gdbarch, vspa2_register_name);
     set_tdesc_pseudo_register_name (gdbarch, vspa2_register_name);
@@ -988,10 +1127,15 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_prepend_unwinder (gdbarch, &vspa_lastframe_unwind);
   dwarf2_frame_set_init_reg (gdbarch, vspa_dwarf2_frame_init_reg);
   dwarf2_frame_set_adjust_return_address_reg (gdbarch, vspa_dwarf2_frame_adjust_return_address_reg);
-  if (mach == bfd_mach_vspa2) 
+  if (mach == bfd_mach_vspa3) 
+  {
+    dwarf2_frame_set_adjust_offset (gdbarch, vspa3_dwarf2_frame_adjust_offset);
+    dwarf2_frame_set_adjust_line (gdbarch, vspa3_dwarf2_frame_adjust_line);
+  }
+  else if (mach == bfd_mach_vspa2) 
   {
     dwarf2_frame_set_adjust_offset (gdbarch, vspa2_dwarf2_frame_adjust_offset);
-    dwarf2_frame_set_adjust_line (gdbarch, vspa2_dwarf2_frame_adjust_line);
+    dwarf2_frame_set_adjust_line (gdbarch, vspa2_dwarf2_frame_adjust_line);   
   }
   else 
   {
@@ -1009,7 +1153,9 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, vspa_address_class_name_to_type_flags);
 
   set_gdbarch_addressable_memory_unit_size (gdbarch, vspa_addressable_memory_unit_size);
-  if (mach == bfd_mach_vspa2)
+  if (mach == bfd_mach_vspa3)
+    set_gdbarch_adjust_addressable_memory_unit_size (gdbarch, vspa3_adjust_addressable_memory_unit_size);
+  else if(mach == bfd_mach_vspa2) 
     set_gdbarch_adjust_addressable_memory_unit_size (gdbarch, vspa2_adjust_addressable_memory_unit_size);
   else
     set_gdbarch_adjust_addressable_memory_unit_size (gdbarch, vspa1_adjust_addressable_memory_unit_size);
@@ -1029,4 +1175,5 @@ _initialize_vspa_tdep (void)
   gdbarch_register (bfd_arch_vspa, vspa_gdbarch_init, NULL);
   initialize_tdesc_vspa1 ();
   initialize_tdesc_vspa2 ();
+  initialize_tdesc_vspa3 ();
 }

@@ -2345,7 +2345,7 @@ find_abstract_instance_name (struct comp_unit *unit,
   abbrev_number = safe_read_leb128 (abfd, info_ptr, &bytes_read, FALSE, info_ptr_end);
   info_ptr += bytes_read;
 
-  if (abbrev_number &&  (info_ptr > info_ptr_end))
+    if (abbrev_number &&  (info_ptr > info_ptr_end))
     {
       abbrev = lookup_abbrev (abbrev_number, unit->abbrevs);
       if (! abbrev)

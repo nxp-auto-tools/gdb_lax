@@ -67,7 +67,10 @@ print_insn_vspa (bfd_vma addr, disassemble_info *info)
 
     instr_length =  get_instr_size_for_proc(processor);
     // read memory at location
-    status = (*info->read_memory_func) ((addr - addr % 2), instrbytes, instr_length, info);
+    if (processor == VCPU)
+    	status = (*info->read_memory_func) ((addr - addr % 2), instrbytes, instr_length, info);
+    else
+    	status = (*info->read_memory_func) (addr , instrbytes, instr_length, info);
     if (status != 0)
     {
       (*info->memory_error_func) (status, addr, info);
@@ -102,11 +105,19 @@ print_insn_vspa (bfd_vma addr, disassemble_info *info)
         if (!hasSingleInstruction && isNull)
             flags |= DECODE_TYPE_LOWER_OPS;
 
+        switch(info->mach)
+        {
+        case bfd_mach_vspa1:
+        	status = disassemble_instruction_vcpu(data, instr_str, 256, flags, symtable, num_symbols, &family, &au_count);
+        	break;
+        case bfd_mach_vspa2:
+        	status = disassemble_instruction_vcpu2(data, instr_str, 256, flags, symtable, num_symbols, &family, &au_count);
+        	break;
+        case bfd_mach_vspa3:
+        	status = disassemble_instruction_vcpu3(data, instr_str, 256, flags, symtable, num_symbols, &family, &au_count);
+        	break;
+        }
 
-        if (info->mach == bfd_mach_vspa1)
-            status = disassemble_instruction_vcpu(data, instr_str, 256, flags, symtable, num_symbols, &family, &au_count);
-        else
-            status = disassemble_instruction_vcpu2(data, instr_str, 256, flags, symtable, num_symbols, &family, &au_count);
         // check for jsr
         if (is_jsr(info->mach, data))
         {
@@ -125,12 +136,20 @@ print_insn_vspa (bfd_vma addr, disassemble_info *info)
     }
     case IPPU:
     {
-        instr_word = 1;
-        if (info->mach == bfd_mach_vspa1)
-            status = disassemble_instruction_ippu(data, instr_str, 256, symtable, num_symbols);
-        else
-            status = disassemble_instruction_ippu2(data, instr_str, 256, symtable, num_symbols);
+    	instr_word = 1;
+    	switch(info->mach)
+    	{
+    	case bfd_mach_vspa1:
+    		status = disassemble_instruction_ippu(data, instr_str, 256, symtable, num_symbols);
+    		break;
 
+    	case bfd_mach_vspa2:
+    	    status = disassemble_instruction_ippu2(data, instr_str, 256, symtable, num_symbols);
+    	    break;
+    	case bfd_mach_vspa3:
+    	    status = disassemble_instruction_ippu3(data, instr_str, 256, symtable, num_symbols);
+    	    break;
+    	}
         break;
     }
     default:
