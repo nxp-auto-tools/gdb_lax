@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!-- Copyright (C) 2015-2016 Free Software Foundation, Inc.
+     Contributed by NXP.
+
+     Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  -->
+
+<!DOCTYPE feature SYSTEM "gdb-target.dtd">
+<feature name="vspa3-core-regs">
+  <reg name="g0" bitsize="32" type="uint32"/>
+  <reg name="g1" bitsize="32" type="uint32"/>
+  <reg name="g2" bitsize="32" type="uint32"/>
+  <reg name="g3" bitsize="32" type="uint32"/>
+  <reg name="g4" bitsize="32" type="uint32"/>
+  <reg name="g5" bitsize="32" type="uint32"/>
+  <reg name="g6" bitsize="32" type="uint32"/>
+  <reg name="g7" bitsize="32" type="uint32"/>
+  <reg name="g8" bitsize="32" type="uint32"/>
+  <reg name="g9" bitsize="32" type="uint32"/>
+  <reg name="g10" bitsize="32" type="uint32"/>
+  <reg name="g11" bitsize="32" type="uint32"/>
+  <reg name="a4" bitsize="32" type="uint32"/>
+  <reg name="a5" bitsize="32" type="uint32"/>
+  <reg name="a6" bitsize="32" type="uint32"/>
+  <reg name="a7" bitsize="32" type="uint32"/>
+  <reg name="a8" bitsize="32" type="uint32"/>
+  <reg name="a9" bitsize="32" type="uint32"/>
+  <reg name="a10" bitsize="32" type="uint32"/>
+  <reg name="a11" bitsize="32" type="uint32"/>
+  <reg name="a12" bitsize="32" type="uint32"/>
+  <reg name="a13" bitsize="32" type="uint32"/>
+  <reg name="a14" bitsize="32" type="uint32"/>
+  <reg name="a15" bitsize="32" type="uint32"/>
+  <reg name="a16" bitsize="32" type="uint32"/>
+  <reg name="a17" bitsize="32" type="uint32"/>
+  <reg name="a18" bitsize="32" type="uint32"/>
+  <reg name="a19" bitsize="32" type="uint32"/>
+  <reg name="a0" bitsize="32" type="uint32"/>
+  <reg name="a1" bitsize="32" type="uint32"/>
+  <reg name="a2" bitsize="32" type="uint32"/>
+  <reg name="a3" bitsize="32" type="uint32"/>
+  <reg name="sp" bitsize="32" type="data_ptr"/>
+  <reg name="pc" bitsize="32" type="code_ptr" regnum="33"/>
+  <reg name="ras_depth" bitsize="32" regnum="34"/>
+  <reg name="ras1" bitsize="32" regnum="35"/>
+  <reg name="ras2" bitsize="32" regnum="36"/>
+  <reg name="ras3" bitsize="32" regnum="37"/>
+  <reg name="ras4" bitsize="32" regnum="38"/>
+  <reg name="ras5" bitsize="32" regnum="39"/>
+  <reg name="ras6" bitsize="32" regnum="40"/>
+  <reg name="ras7" bitsize="32" regnum="41"/>
+  <reg name="ras8" bitsize="32" regnum="42"/>
+  <reg name="ras9" bitsize="32" regnum="43"/>
+  <reg name="ras10" bitsize="32" regnum="44"/>
+  <reg name="ras11" bitsize="32" regnum="45"/>
+  <reg name="ras12" bitsize="32" regnum="46"/>
+  <reg name="ras13" bitsize="32" regnum="47"/>
+  <reg name="ras14" bitsize="32" regnum="48"/>
+  <reg name="ras15" bitsize="32" regnum="49"/>
+  <reg name="ras16" bitsize="32" regnum="50"/>
+  <reg name="control" bitsize="32" type="uint32"/>
+</feature>
