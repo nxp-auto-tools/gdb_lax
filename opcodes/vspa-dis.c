@@ -113,9 +113,11 @@ print_insn_vspa (bfd_vma addr, disassemble_info *info)
         case bfd_mach_vspa2:
         	status = disassemble_instruction_vcpu2(data, instr_str, 256, flags, symtable, num_symbols, &family, &au_count);
         	break;
+#ifdef _VSPA3_
         case bfd_mach_vspa3:
         	status = disassemble_instruction_vcpu3(data, instr_str, 256, flags, symtable, num_symbols, &family, &au_count);
         	break;
+#endif
         }
 
         // check for jsr
@@ -146,9 +148,11 @@ print_insn_vspa (bfd_vma addr, disassemble_info *info)
     	case bfd_mach_vspa2:
     	    status = disassemble_instruction_ippu2(data, instr_str, 256, symtable, num_symbols);
     	    break;
+#ifdef _VSPA3_
     	case bfd_mach_vspa3:
     	    status = disassemble_instruction_ippu3(data, instr_str, 256, symtable, num_symbols);
     	    break;
+#endif
     	}
         break;
     }
