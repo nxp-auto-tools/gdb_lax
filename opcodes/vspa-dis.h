@@ -1,6 +1,8 @@
 #ifndef _RUBY_DIS_H_
 #define _RUBY_DIS_H_
 
+#define _VSPA3_
+
 #if defined(__cplusplus)
 extern "C"
 {
