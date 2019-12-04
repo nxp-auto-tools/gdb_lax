@@ -1,6 +1,8 @@
 #ifndef _RUBY_DIS_H_
 #define _RUBY_DIS_H_
 
+#define _VSPA3_
+
 #if defined(__cplusplus)
 extern "C"
 {
@@ -51,7 +53,22 @@ struct SYMTABLE
 	unsigned int address;
 };
 
+enum DAsmCore
+{
+	VCPU,
+	VCPU2,
+#ifdef _VSPA3_
+	VCPU3,
+#endif
+	IPPU,
+	IPPU2,
+#ifdef _VSPA3_
+	IPPU3,
+#endif
+};
+
 #ifndef EXTENDED_DISASSEMBLER_API
+
 DLL_EXPORT int disassemble_instruction_vcpu(bfd_vma ruby_insn,
 	char *out_buf,
 	int out_buf_size,
@@ -81,14 +98,36 @@ DLL_EXPORT int disassemble_instruction_ippu2(bfd_vma ruby_insn,
 	int out_buf_size,
 	struct SYMTABLE sym_table[],
 	unsigned int num_symbol);
+
+#ifdef _VSPA3_
+DLL_EXPORT int disassemble_instruction_vcpu3(bfd_vma ruby_insn,
+	char *out_buf,
+	int out_buf_size,
+	int flag,
+	struct SYMTABLE sym_table[],
+	unsigned int num_symbol,
+	unsigned char *family,
+	const unsigned int *au_version_number);
+
+
+DLL_EXPORT int disassemble_instruction_ippu3(bfd_vma ruby_insn,
+	char *out_buf,
+	int out_buf_size,
+	struct SYMTABLE sym_table[],
+	unsigned int num_symbol);
+#endif
+
 #else
+
 DLL_EXPORT void check_dmem_access(bfd_vma ruby_insn,
 	char *compacted,
-	char *flag);
+	char *flag,
+	enum DAsmCore core_type);
 
 DLL_EXPORT int check_cof(bfd_vma ruby_insn,
 	enum cof_type *type,
-	long *immediate);
+	long *immediate,
+	enum DAsmCore core_type);
 
 DLL_EXPORT int check_mvip(bfd_vma ruby_insn);
 #endif
