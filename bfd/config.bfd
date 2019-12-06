@@ -1713,7 +1713,7 @@ case "${targ}" in
     targ_defvec=visium_elf32_vec
     ;;
 
-  lax*elf)
+  lax*)
     targ_defvec=vspa_elf32_vec
     want64=true
     targ_cflags=-D_VSPA3_
