@@ -74,7 +74,7 @@ WHICH = aarch64 \
 	s390-tevx-linux64 s390x-tevx-linux64 \
 	tic6x-c64xp tic6x-c64x tic6x-c62x \
 	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux \
-	vspa1 vspa2 vspa3
+	vspa1 vspa2 lax
 
 # Record which registers should be sent to GDB by default after stop.
 aarch64-expedite = x29,sp,pc
@@ -139,7 +139,7 @@ tic6x-c64x-linux-expedite = A15,PC
 tic6x-c62x-linux-expedite = A15,PC
 vspa1-expedite = sp,pc
 vspa2-expedite = sp,pc
-vspa3-expedite = sp,pc
+lax-expedite = sp,pc
 
 XSLTPROC = xsltproc
 outdir = ../regformats
@@ -248,7 +248,7 @@ XMLTOC = \
 	tic6x-c64xp.xml \
 	vspa1.xml \
 	vspa2.xml \
-	vspa3.xml
+	lax.xml
 
 CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
 GDB = false

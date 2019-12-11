@@ -12,9 +12,9 @@ initialize_tdesc_vspa3 (void)
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
 
-  set_tdesc_architecture (result, bfd_scan_arch ("vspa3"));
+  set_tdesc_architecture (result, bfd_scan_arch ("lax"));
 
-  feature = tdesc_create_feature (result, "vspa3-core-regs");
+  feature = tdesc_create_feature (result, "lax-core-regs");
   tdesc_create_reg (feature, "g0", 0, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "g1", 1, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "g2", 2, 1, NULL, 32, "uint32");
@@ -66,6 +66,7 @@ initialize_tdesc_vspa3 (void)
   tdesc_create_reg (feature, "ras14", 48, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ras15", 49, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ras16", 50, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "control", 51, 1, NULL, 32, "uint32");
 
   tdesc_vspa3 = result;
 }

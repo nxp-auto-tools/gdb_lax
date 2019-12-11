@@ -30,8 +30,8 @@ const bfd_arch_info_type bfd_vspa3_arch =
   8,				/* bits per byte */
   bfd_arch_vspa,		/* architecture */
   bfd_mach_vspa3,		/* machine */
-  "vspa",			/* architecture name */
-  "vspa3",			/* printable name */
+  "lax",			/* architecture name */
+  "lax",			/* printable name */
   2,				/* section align power */
   FALSE,				/* the default ? */
   bfd_default_compatible,	/* architecture comparison fn */
