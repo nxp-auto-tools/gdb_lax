@@ -33,9 +33,10 @@
 #include "dwarf2-frame.h"
 #include "value.h"
 #include "vspa-tdep.h"
+
+#include "features/lax.c"
 #include "features/vspa2.c"
 #include "features/vspa1.c"
-#include "features/vspa3.c"
 #include "target.h"
 #include "objfiles.h"
 

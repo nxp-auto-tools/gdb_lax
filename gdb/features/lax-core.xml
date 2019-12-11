@@ -7,7 +7,7 @@
      notice and this notice are preserved.  -->
 
 <!DOCTYPE feature SYSTEM "gdb-target.dtd">
-<feature name="vspa3-core-regs">
+<feature name="lax-core-regs">
   <reg name="g0" bitsize="32" type="uint32"/>
   <reg name="g1" bitsize="32" type="uint32"/>
   <reg name="g2" bitsize="32" type="uint32"/>
@@ -58,6 +58,5 @@
   <reg name="ras13" bitsize="32" regnum="47"/>
   <reg name="ras14" bitsize="32" regnum="48"/>
   <reg name="ras15" bitsize="32" regnum="49"/>
-  <reg name="ras16" bitsize="32" regnum="50"/>
-  <reg name="control" bitsize="32" type="uint32"/>
+  <reg name="ras16" bitsize="32" regnum="50"/>  
 </feature>

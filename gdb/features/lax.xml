@@ -8,6 +8,6 @@
 
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>
-  <architecture>vspa3</architecture>
-  <xi:include href="vspa3-core.xml"/>  
+  <architecture>lax</architecture>
+  <xi:include href="lax-core.xml"/>  
 </target>
