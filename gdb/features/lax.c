@@ -66,7 +66,5 @@ initialize_tdesc_vspa3 (void)
   tdesc_create_reg (feature, "ras14", 48, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ras15", 49, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ras16", 50, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "control", 51, 1, NULL, 32, "uint32");
-
   tdesc_vspa3 = result;
 }

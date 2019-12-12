@@ -52,7 +52,7 @@ static char *vspa3_register_names[] =
   "a7", "a8", "a9", "a10", "a11",          /* 15 16 17 18 19 */
   "a12", "a13", "a14", "a15", "a16",       /* 20 21 22 23 24 */
   "a17", "a18", "a19", "a0",  "a1",        /* 25 26 27 28 29 */
-  "a2",  "a3",  "sp",  "pc"                /* 30 31 32 33 */
+  "a2",  "a3",  "sp",  "pc"   		       /* 30 31 32 33 */
 };
 
 static char *vspa2_register_names[] =
@@ -1021,7 +1021,7 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                 vspa2_register_names[i]);
     }
 
-    feature = tdesc_find_feature (tdesc, "vspa3-core-regs");
+    feature = tdesc_find_feature (tdesc, "lax-core-regs");
     if (feature != NULL)
     {
         has_feature = 1;
