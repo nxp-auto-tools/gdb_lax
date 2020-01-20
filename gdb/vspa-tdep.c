@@ -494,7 +494,7 @@ vspa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static CORE_ADDR
 vspa3_adjust_dwarf2_data_uoffset (CORE_ADDR uoffset)
 {
-  uoffset /= 2;
+  uoffset /= 1;
   return uoffset;
 }
 
@@ -866,7 +866,7 @@ vspa3_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR ad
       return 4;
   else
     if ((addr & (3ULL<<32)) == (3ULL<<32)) // IPPU_DRAM
-      return 2;
+      return 1;
   else
     if ((addr & (4ULL<<32)) == (4ULL<<32)) // OCRAM_DATA
       return 1;

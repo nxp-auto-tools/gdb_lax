@@ -6053,7 +6053,8 @@ int
 producer_is_vspa (const char *producer)
 {
   static const char *const vspa_idents[] = {
-    "VSPA2 C Compiler"
+    "VSPA2 C Compiler",
+	"Advanced Accelerating Architectures C Compiler" //VSPA3/LAX compiler name
   };
   int i;
 

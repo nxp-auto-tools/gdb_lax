@@ -26,6 +26,9 @@
 /* Processor specific flags for the ELF header e_flags field.  */
 #define EF_VSPA_ARCH_VSPA2   0x02
 
+#define VSPA3_VCPU_DMEM_BANK0_LIMIT 0x40000  //1024 * 256 * 4  octets
+#define VSPA3_VCPU_DMEM_BANK1_LIMIT 0x80000  //1024 * 512 * 4  octets
+
 /* Relocations.  */
 START_RELOC_NUMBERS (elf_vspa_reloc_type)
   RELOC_NUMBER (R_VSPA_NONE, 0)
@@ -52,6 +55,7 @@ extern int vspa_vcpu_dram(bfd_vma addr);
 extern bfd_vma  vspa_vma_get_dram_size(bfd_vma vspa_arch_type);
 //#define VSPA_VMA_GET_DRAM_BIT_SIZE(x) ( (bfd_mach_vspa2 == x)  ? 2 : 4 )
 #define ELF_EF_VSPA_CORE(f)       ( (f) & 0xffUL )
+
 
 
 #endif /* _ELF_VSPA_H */

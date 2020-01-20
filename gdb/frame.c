@@ -1917,7 +1917,8 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
      the next frame.  This happens when a frame unwind goes backwards.
      This check is valid only if this frame and the next frame are NORMAL.
      See the comment at frame_id_inner for details.  */
-  if (get_frame_type (this_frame) == NORMAL_FRAME
+
+    if (get_frame_type (this_frame) == NORMAL_FRAME
       && this_frame->next->unwind->type == NORMAL_FRAME
       && frame_id_inner (get_frame_arch (this_frame->next),
 			 get_frame_id (this_frame),
