@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- Copyright (C) 2015-2016 Free Software Foundation, Inc.
+     Contributed by NXP.
+
+     Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  -->
+
+<!DOCTYPE feature SYSTEM "gdb-target.dtd">
+<feature name="lax-ippu-regs">
+  <reg name="ippu_ctr" bitsize="32" type="uint32"/>
+  <reg name="ippu_status" bitsize="32" type="uint32"/>
+  <reg name="ippu_runctr" bitsize="32" type="uint32"/>
+  <reg name="ippu_baseaddr" bitsize="32" type="uint32"/>
+  <reg name="ippu_hwver" bitsize="32" type="uint32"/>
+  <reg name="ippu_swver" bitsize="32" type="uint32"/>
+  <reg name="ippu_pc" bitsize="16" type="uint32"/>  
+</feature>

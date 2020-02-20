@@ -9,5 +9,6 @@
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>
   <architecture>lax</architecture>
-  <xi:include href="lax-core.xml"/>  
+  <xi:include href="lax-core.xml"/>
+  <xi:include href="lax-ippu.xml"/>  
 </target>

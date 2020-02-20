@@ -41,7 +41,7 @@
   <reg name="a2" bitsize="32" type="uint32"/>
   <reg name="a3" bitsize="32" type="uint32"/>    
   <reg name="sp" bitsize="32" type="data_ptr"/>
-  <reg name="pc" bitsize="32" type="code_ptr" regnum="33"/>
+  <reg name="pc" bitsize="64" type="code_ptr" regnum="33"/>
   <reg name="ras_depth" bitsize="32" regnum="34"/>
   <reg name="ras1" bitsize="32" regnum="35"/>
   <reg name="ras2" bitsize="32" regnum="36"/>
@@ -59,5 +59,6 @@
   <reg name="ras14" bitsize="32" regnum="48"/>
   <reg name="ras15" bitsize="32" regnum="49"/>
   <reg name="ras16" bitsize="32" regnum="50"/>
+  <reg name="vcpu_pc" bitsize="32" regnum="51"/>
   <reg name="control" bitsize="32" type="uint32"/>
 </feature>
