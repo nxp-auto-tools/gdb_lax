@@ -471,7 +471,9 @@ vspa_read_pc (struct regcache *regcache)
   ULONGEST pc_value;
 
   regcache_cooked_read_unsigned (regcache, VSPA_PC_REGNUM, &pc_value);
-  VSPA_VMA_PUT_PREFIX(pc_value, kRUBY_RAWMEMSPACE_VCPU_PRAM_GDB);
+  //if PC register value doesn't have prefix, it means that is in VCPU_PRAM
+  if ((pc_value & 0xFFFFFFFF00000000ULL) != (kRUBY_RAWMEMSPACE_IPPU_PRAM<<32))
+	  VSPA_VMA_PUT_PREFIX(pc_value, kRUBY_RAWMEMSPACE_VCPU_PRAM_GDB);
   return pc_value;
 }
 
@@ -487,7 +489,9 @@ static CORE_ADDR
 vspa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   CORE_ADDR pc_value =  frame_unwind_register_unsigned (next_frame, VSPA_PC_REGNUM);
-  VSPA_VMA_PUT_PREFIX(pc_value, kRUBY_RAWMEMSPACE_VCPU_PRAM_GDB);
+  //if PC value doesn't have prefix it means that is in VCPU_PRAM
+  if ((pc_value & 0xFFFFFFFF00000000ULL) != (kRUBY_RAWMEMSPACE_IPPU_PRAM<<32))
+	  VSPA_VMA_PUT_PREFIX(pc_value, kRUBY_RAWMEMSPACE_VCPU_PRAM_GDB);
   return pc_value;
 }
 
@@ -573,7 +577,7 @@ vspa3_adjust_dwarf2_addr (CORE_ADDR pc)
 {
   if (pc & 0xFFFFFFFF00000000ULL)
     {
-      gdb_assert ((pc & 0xFFFFFFFF00000000ULL) == (kRUBY_RAWMEMSPACE_VCPU_PRAM_GDB<<32));
+      gdb_assert ((pc & 0xFFFFFFFF00000000ULL) == (kRUBY_RAWMEMSPACE_VCPU_PRAM_GDB<<32) || (pc & 0xFFFFFFFF00000000ULL) == (kRUBY_RAWMEMSPACE_IPPU_PRAM<<32));
       return pc;
     }
   else

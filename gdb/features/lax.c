@@ -48,7 +48,7 @@ initialize_tdesc_vspa3 (void)
   tdesc_create_reg (feature, "a2", 30, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "a3", 31, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "sp", 32, 1, NULL, 32, "data_ptr");
-  tdesc_create_reg (feature, "pc", 33, 1, NULL, 32, "code_ptr");
+  tdesc_create_reg (feature, "pc", 33, 1, NULL, 64, "code_ptr");
   tdesc_create_reg (feature, "ras_depth", 34, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ras1", 35, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ras2", 36, 1, NULL, 32, "int");
