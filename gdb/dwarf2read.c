@@ -14850,6 +14850,12 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	/* We just treat this as an integer and then recognize the
 	   type by name elsewhere.  */
 	break;
+    
+    case DW_ATE_unsigned_fixed:
+          type_flags |= TYPE_FLAG_UNSIGNED;
+    case DW_ATE_signed_fixed:
+          code = TYPE_CODE_FIXED;
+    break;
 
       default:
 	complaint (&symfile_complaints, _("unsupported DW_AT_encoding: '%s'"),
@@ -14860,6 +14866,15 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   type = init_type (code, size, type_flags, NULL, objfile);
   TYPE_NAME (type) = name;
   TYPE_TARGET_TYPE (type) = target_type;
+  
+  if (code == TYPE_CODE_FIXED) {
+      attr = dwarf2_attr (die, DW_AT_binary_scale, cu);
+      if (attr){
+          TYPE_BINARYSCALE (type) = DW_SND (attr);
+      }else{
+          TYPE_BINARYSCALE (type) = 15;
+      }
+  }
 
   if (name && strcmp (name, "char") == 0)
     TYPE_NOSIGN (type) = 1;

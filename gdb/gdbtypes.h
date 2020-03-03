@@ -174,6 +174,8 @@ enum type_code
     TYPE_CODE_NAMESPACE,	/**< C++ namespace.  */
 
     TYPE_CODE_DECFLOAT,		/**< Decimal floating point.  */
+    
+    TYPE_CODE_FIXED,		/* Fixed point type */
 
     TYPE_CODE_MODULE,		/**< Fortran module.  */
 
@@ -607,6 +609,9 @@ union type_specific
      targets and the second is for little endian targets.  */
 
   const struct floatformat **floatformat;
+  
+  /* BINARYSCALE is for TYPE_CODE_FIXED. */
+  int binaryscale;
 
   /* * For TYPE_CODE_FUNC and TYPE_CODE_METHOD types.  */
 
@@ -1324,6 +1329,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
     : TYPE_RAW_CPLUS_SPECIFIC(thistype))
 #define TYPE_RAW_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
 #define TYPE_FLOATFORMAT(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.floatformat
+#define TYPE_BINARYSCALE(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.binaryscale
 #define TYPE_GNAT_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.gnat_stuff
 #define TYPE_DESCRIPTIVE_TYPE(thistype) TYPE_GNAT_SPECIFIC(thistype)->descriptive_type
 #define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->calling_convention

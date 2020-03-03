@@ -956,9 +956,11 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   if ((TYPE_CODE (type1) != TYPE_CODE_FLT
        && TYPE_CODE (type1) != TYPE_CODE_DECFLOAT
+       && TYPE_CODE (type1) != TYPE_CODE_FIXED
        && !is_integral_type (type1))
       || (TYPE_CODE (type2) != TYPE_CODE_FLT
 	  && TYPE_CODE (type2) != TYPE_CODE_DECFLOAT
+	  && TYPE_CODE (type2) != TYPE_CODE_FIXED
 	  && !is_integral_type (type2)))
     error (_("Argument to arithmetic operation not a number or boolean."));
 
@@ -1005,7 +1007,22 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
       val = value_from_decfloat (result_type, v);
     }
-  else if (TYPE_CODE (type1) == TYPE_CODE_FLT
+   else if (TYPE_CODE (type1) == TYPE_CODE_FIXED
+      || TYPE_CODE (type2) == TYPE_CODE_FIXED)
+    {
+      struct value *result;
+
+      /* convert fixed to double */
+      if(TYPE_CODE (type1) == TYPE_CODE_FIXED)
+         arg1 = value_cast(builtin_type(get_type_arch (type1))->builtin_double, arg1);
+      if(TYPE_CODE (type2) == TYPE_CODE_FIXED)
+         arg2 = value_cast(builtin_type(get_type_arch (type2))->builtin_double, arg2);
+
+      /* use largest type for result */
+      result_type = (TYPE_LENGTH (type1) > TYPE_LENGTH (type2)) ? type1 : type2;
+      return value_cast (result_type, value_binop (arg1, arg2, op));
+    }
+   else if (TYPE_CODE (type1) == TYPE_CODE_FLT
 	   || TYPE_CODE (type2) == TYPE_CODE_FLT)
     {
       /* FIXME-if-picky-about-floating-accuracy: Should be doing this
@@ -1762,6 +1779,8 @@ value_pos (struct value *arg1)
     return value_from_double (type, value_as_double (arg1));
   else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
     return value_from_decfloat (type, value_contents (arg1));
+  else if (TYPE_CODE (type) == TYPE_CODE_FIXED)
+    return value_from_fixed (type, value_contents (arg1));
   else if (is_integral_type (type))
     {
       return value_from_longest (type, value_as_long (arg1));
@@ -1804,6 +1823,12 @@ value_neg (struct value *arg1)
 
       memcpy (value_contents_raw (val), decbytes, len);
       return val;
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_FIXED)
+    {
+      LONGEST unshiftedval = -extract_signed_integer (value_contents (arg1),
+                                                      TYPE_LENGTH (type), gdbarch_byte_order (get_type_arch (type)));
+      return value_from_fixed (type, (gdb_byte*)&unshiftedval/*, gdbarch_byte_order (get_type_arch (type))*/);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_FLT)
     return value_from_double (type, -value_as_double (arg1));

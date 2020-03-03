@@ -538,6 +538,15 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
       c_val_print_memberptr (type, valaddr, embedded_offset, address, stream,
 			     recurse, original_value, options);
       break;
+      
+    case TYPE_CODE_FIXED:
+        /* convert to double and print that */
+       c_value_print (value_cast (builtin_type(get_type_arch (type))->builtin_double, 
+                    value_from_contents_and_address(type, valaddr + embedded_offset, 0)),
+                    stream, options);
+       break;
+       
+
 
     case TYPE_CODE_REF:
     case TYPE_CODE_ENUM:
