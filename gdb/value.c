@@ -3022,13 +3022,7 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
         value = extract_unsigned_integer (valaddr, len, byte_order);
       else
         value = extract_signed_integer (valaddr, len, byte_order);
-      
-      /* shift by the binary scale value */
-      /*while(binaryscale < 0) {
-        binaryscale++;
-        value /= 2;
-      }
-      */
+
       while(binaryscale > 0) {
         binaryscale--;
         value /= 2;
