@@ -749,6 +749,11 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 3;
       return value_from_decfloat (exp->elts[pc + 1].type,
 				  exp->elts[pc + 2].decfloatconst);
+      
+    case OP_FIXED:
+      (*pos) += 3;
+      return value_from_fixed (exp->elts[pc + 1].type,
+			       exp->elts[pc + 2].fixedconst);
 
     case OP_ADL_FUNC:
     case OP_VAR_VALUE:

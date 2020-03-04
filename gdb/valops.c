@@ -450,7 +450,7 @@ value_cast (struct type *type, struct value *arg2)
 
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
 	    || code2 == TYPE_CODE_DECFLOAT || code2 == TYPE_CODE_ENUM
-	    || code2 == TYPE_CODE_RANGE);
+	    || code2 == TYPE_CODE_RANGE || code2 == TYPE_CODE_FIXED);
 
   if ((code1 == TYPE_CODE_STRUCT || code1 == TYPE_CODE_UNION)
       && (code2 == TYPE_CODE_STRUCT || code2 == TYPE_CODE_UNION)
@@ -480,6 +480,32 @@ value_cast (struct type *type, struct value *arg2)
 	decimal_from_integral (arg2, dec, dec_len, byte_order);
 
       return value_from_decfloat (type, dec);
+    }
+    else if (code1 == TYPE_CODE_FIXED && scalar)
+    {
+      /* first convert to double */
+      struct value *ieee_double = value_cast (builtin_type(get_type_arch (type))->builtin_double, arg2);
+
+      if(ieee_double) {
+        LONGEST lvalue;
+        DOUBLEST value = value_as_double (ieee_double);
+        int binaryscale = TYPE_BINARYSCALE(type);
+
+        /* shift by the binary scale value */
+        /*while(binaryscale < 0) {
+          binaryscale++;
+          value *= 2;
+        }*/
+        while(binaryscale > 0) {
+          binaryscale--;
+          value *= 2;
+        }
+        lvalue = value;
+
+        return value_from_fixed (type, (gdb_byte*)&lvalue);
+      }
+      error (_("Failed to convert to fixed-point."));
+      return 0;
     }
   else if ((code1 == TYPE_CODE_INT || code1 == TYPE_CODE_ENUM
 	    || code1 == TYPE_CODE_RANGE)
@@ -856,24 +882,14 @@ struct value *
 value_one (struct type *type)
 {
   struct type *type1 = check_typedef (type);
+  //check_typedef(type);
   struct value *val;
 
-  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
-    {
-      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-      gdb_byte v[16];
-
-      decimal_from_string (v, TYPE_LENGTH (type), byte_order, "1");
-      val = value_from_decfloat (type, v);
-    }
-  else if (TYPE_CODE (type1) == TYPE_CODE_FLT)
-    {
-      val = value_from_double (type, (DOUBLEST) 1);
-    }
-  else if (is_integral_type (type1))
-    {
-      val = value_from_longest (type, (LONGEST) 1);
-    }
+  if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT
+      || TYPE_CODE (type) == TYPE_CODE_FLT
+      || TYPE_CODE (type) == TYPE_CODE_FIXED
+      || is_integral_type (type))
+    val = value_cast (type, value_from_longest (builtin_type(get_type_arch (type))->builtin_int32, 1));
   else if (TYPE_CODE (type1) == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
     {
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type1));

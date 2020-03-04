@@ -45,6 +45,11 @@ enum exp_opcode
 #define OP(name) name ,
 
 #include "std-operator.def"
+      
+/* OP_FIXED is followed by by a type pointer in the next exp_element
+     and a fixed constant value in the following exp_element,
+     Then comes the binaryscale */
+    OP (OP_FIXED)
 
     /* First extension operator.  Individual language modules define extra
        operators in *.def include files below with numbers higher than
@@ -67,6 +72,7 @@ union exp_element
     LONGEST longconst;
     DOUBLEST doubleconst;
     gdb_byte decfloatconst[16];
+    gdb_byte fixedconst[16];
     /* Really sizeof (union exp_element) characters (or less for the last
        element of a string).  */
     char string;

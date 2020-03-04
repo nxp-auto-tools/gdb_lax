@@ -2947,6 +2947,9 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
       /* libdecnumber has a function to convert from decimal to integer, but
 	 it doesn't work when the decimal number has a fractional part.  */
       return (LONGEST) decimal_to_doublest (valaddr, len, byte_order);
+      
+    case TYPE_CODE_FIXED:
+     return unpack_double (type, valaddr, 0);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -2974,7 +2977,8 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
   int len;
   int nosign;
 
-  *invp = 0;			/* Assume valid.  */
+  if(invp)
+    *invp = 0;
   type = check_typedef (type);
   code = TYPE_CODE (type);
   len = TYPE_LENGTH (type);
@@ -3001,6 +3005,8 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
       if (!floatformat_is_valid (floatformat_from_type (type), valaddr))
 	{
 	  *invp = 1;
+      if(invp)
+        *invp = 1;
 	  return 0.0;
 	}
 
@@ -3008,6 +3014,21 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
     }
   else if (code == TYPE_CODE_DECFLOAT)
     return decimal_to_doublest (valaddr, len, byte_order);
+  else if (code == TYPE_CODE_FIXED)
+    {
+      DOUBLEST value;
+      int binaryscale = TYPE_BINARYSCALE(type);
+      if (nosign)
+        value = extract_unsigned_integer (valaddr, len, byte_order);
+      else
+        value = extract_signed_integer (valaddr, len, byte_order);
+
+      while(binaryscale > 0) {
+        binaryscale--;
+        value /= 2;
+      }
+      return value;
+    }
   else if (nosign)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
@@ -3831,6 +3852,16 @@ readjust_indirect_value_type (struct value *value, struct type *enc_type,
 
   /* We may be pointing to an object of some derived type.  */
   return value_full_object (value, NULL, 0, 0, 0);
+}
+
+struct value *
+value_from_fixed (struct type *type, const gdb_byte *value)
+{
+  struct value *val = allocate_value (type);
+
+  memcpy (value_contents_raw (val), value, TYPE_LENGTH (type));
+
+  return val;
 }
 
 struct value *
