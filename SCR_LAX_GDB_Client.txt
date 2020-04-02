@@ -1,0 +1,28 @@
+NXP Software Content Register
+
+Release Name: S32 GDB Client for LAX
+
+Outgoing License:         LA_OPT_NXP_Software_License v8 June 2019
+
+Binutils GDB                Description: Binutils GDB
+                            Version: 7.12.1
+                            Home Page: https://www.gnu.org/software/binutils/
+                            License: GNU General Public License v2.0 or later
+                            Format: binary
+                            Location: gdb-7.12-lax 
+
+Disasembly library for LAX  Description: Disassembly library for LAX
+                            Version: Unspecified
+                            Home Page: https://source.codeaurora.org/external/s32ds/compiler/vspa_disasm_lib/
+                            License: BSD 3-clause "New" or "Revised" License
+                            Format: library
+                            Location: gdb-7.12-lax
+						  
+GDB Client for LAX          Description: GDB Client for LAX
+                            Version: Unspecified
+                            Home Page: None
+                            License: GNU General Public License v3.0 or later
+                            Format: binary
+                            Location: gdb-7.12-lax					  
+
+[end]
