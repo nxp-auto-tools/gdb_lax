@@ -17897,6 +17897,10 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
   /* Non-zero if we're recording line info (as opposed to building partial
      symtabs).  */
   int record_lines_p = !decode_for_pst_p;
+
+  /*to track debug info with {0,0} line number tag*/
+  unsigned int jump_to_zero_flag = 0;
+
   /* A collection of things we need to pass to dwarf_record_line.  */
   lnp_reader_state reader_state;
 
@@ -17918,6 +17922,8 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 
       /* Reset the state machine at the start of each sequence.  */
       init_lnp_state_machine (&state_machine, &reader_state);
+      /* Reset new flag as well*/
+      jump_to_zero_flag = 0;
 
       if (record_lines_p && lh->num_file_names >= state_machine.file)
 	{
@@ -18066,8 +18072,23 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      {
 		int line_delta
 		  = read_signed_leb128 (abfd, line_ptr, &bytes_read);
+		/*if we've got zero lines already - recover from this*/
+		if(jump_to_zero_flag == 1){
+			state_machine.line = 0; /*to be updated in else*/
+			jump_to_zero_flag = 0;
+		}
+		/*don't move line to zero - leave as is*/
+		if ((state_machine.line + line_delta) == 0) {
+		    jump_to_zero_flag = 1;
+		} else if ((state_machine.line + line_delta) < 0) {
+			/*strange compiler's thing*/
+			jump_to_zero_flag = 1;
+			state_machine.line = -line_delta;
+		} else {
+			/* advance (+/-)delta as normal */
+			state_machine.line += line_delta;
+		}
 
-		state_machine.line += line_delta;
 		if (line_delta != 0)
 		  state_machine.line_has_non_zero_discriminator
 		    = state_machine.discriminator != 0;
