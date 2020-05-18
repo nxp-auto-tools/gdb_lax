@@ -303,21 +303,28 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 	 write them out in a single go for the MI.  */
       struct ui_file *opcode_stream = mem_fileopen ();
       struct cleanup *cleanups =
-	make_cleanup_ui_file_delete (opcode_stream);
+	  make_cleanup_ui_file_delete (opcode_stream);
 
       size = disasm_print_insn (gdbarch, pc, di);
-      end_pc = pc + size;
-
-      for (;pc < end_pc; ++pc)
-	{
-	  err = (*di->read_memory_func) (pc, &data, 1, di);
-	  if (err != 0)
-	    (*di->memory_error_func) (err, pc, di);
-	  fprintf_filtered (opcode_stream, "%s%02x",
-			    spacer, (unsigned) data);
-	  spacer = " ";
-	}
-
+      /* For vspa we display already read macroinstruction opcode */
+      if(di->arch ==  bfd_arch_vspa)
+      {
+          fprintf_filtered (opcode_stream, "%s%16lx",
+              spacer,  *((bfd_vma*) (di->private_data)));
+      }
+      else
+      {
+          end_pc = pc + size;
+          for (;pc < end_pc; ++pc)
+          {
+              err = (*di->read_memory_func) (pc, &data, 1, di);
+              if (err != 0)
+                  (*di->memory_error_func) (err, pc, di);
+              fprintf_filtered (opcode_stream, "%s%02x",
+                   spacer, (unsigned) data);
+              spacer = " ";
+		  }
+      }
       ui_out_field_stream (uiout, "opcodes", opcode_stream);
       ui_out_text (uiout, "\t");
 
