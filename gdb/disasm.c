@@ -309,8 +309,9 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
       /* For vspa we display already read macroinstruction opcode */
       if(di->arch ==  bfd_arch_vspa)
       {
-          fprintf_filtered (opcode_stream, "%s%16lx",
-              spacer,  *((bfd_vma*) (di->private_data)));
+          fprintf_filtered (opcode_stream, "%s%02x",
+              //spacer,  *((bfd_vma*) (di->private_data)));
+          "",   (unsigned) *((bfd_byte*) (di->private_data)));
       }
       else
       {
