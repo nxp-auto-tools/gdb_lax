@@ -18073,17 +18073,13 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		int line_delta
 		  = read_signed_leb128 (abfd, line_ptr, &bytes_read);
 		/*if we've got zero lines already - recover from this*/
-		if(jump_to_zero_flag == 1){
+		if((jump_to_zero_flag == 1) && (line_delta > 0)){
 			state_machine.line = 0; /*to be updated in else*/
 			jump_to_zero_flag = 0;
 		}
 		/*don't move line to zero - leave as is*/
 		if ((state_machine.line + line_delta) == 0) {
 		    jump_to_zero_flag = 1;
-		} else if ((state_machine.line + line_delta) < 0) {
-			/*strange compiler's thing*/
-			jump_to_zero_flag = 1;
-			state_machine.line = -line_delta;
 		} else {
 			/* advance (+/-)delta as normal */
 			state_machine.line += line_delta;
