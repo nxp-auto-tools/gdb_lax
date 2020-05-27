@@ -329,6 +329,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 
     			  fprintf_filtered (opcode_stream, "%s%02x",
     					  spacer, (unsigned) data);
+    			  spacer = " ";
     		  }
     	  }
       }
