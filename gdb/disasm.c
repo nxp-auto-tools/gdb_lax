@@ -306,12 +306,31 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 	  make_cleanup_ui_file_delete (opcode_stream);
 
       size = disasm_print_insn (gdbarch, pc, di);
-      /* For vspa we display already read macroinstruction opcode */
-      if(di->arch ==  bfd_arch_vspa)
-      {
-          //fprintf_filtered (opcode_stream, "%s%02x",
-           //   spacer,  *((bfd_vma*) (di->private_data)));
-          //"",   (unsigned) *((bfd_byte*) (di->private_data)));
+
+      /* For vspa don't read again opcodes */
+      if(di->arch ==  bfd_arch_vspa){
+    	  const bfd_byte* data_p = (const bfd_byte*) di->private_data;
+
+    	  //for IPPU instr just print first byte
+    	  if((pc & 0xf00000000ULL) == 0x200000000ULL){
+    		  data = *data_p;
+    		  fprintf_filtered (opcode_stream, "%s%02x",
+    				  spacer, (unsigned) data);
+    	  }
+    	  else
+    	  {
+    		  end_pc = pc + size;
+    		  for (;pc < end_pc; ++pc){
+
+    			  if (pc%2)
+    				  data = data_p[4];
+    			  else
+    				  data = *data_p;
+
+    			  fprintf_filtered (opcode_stream, "%s%02x",
+    					  spacer, (unsigned) data);
+    		  }
+    	  }
       }
       else
       {
