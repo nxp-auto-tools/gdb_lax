@@ -76,10 +76,12 @@ print_insn_vspa (bfd_vma addr, disassemble_info *info)
       (*info->memory_error_func) (status, addr, info);
       return -1;
     }
-    
     // get the bits
     bfd_vma data;
     data = bfd_get_bits (instrbytes, instr_length * 8, info->display_endian == BFD_ENDIAN_BIG);
+
+    //save macroinstuction opcode for later use
+	info->private_data = instrbytes;
     flags=DECODE_TYPE_NO_FLAG_PRINT;
     // decode the bits based on the processor: vcpu or ippu
     switch (processor)
@@ -169,4 +171,3 @@ print_insn_vspa (bfd_vma addr, disassemble_info *info)
 
    return instr_word;
 }
-
