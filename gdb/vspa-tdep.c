@@ -857,27 +857,30 @@ vspa_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 static int
 vspa_addressable_memory_unit_size (struct gdbarch *gdbarch)
 {
-  return 1;
+  return 1; //ORG
 }
 
 static int
 vspa3_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size)
 {
-  if ((addr & (1ULL<<32)) == (1ULL<<32)) // VCPU_DRAM
+  if ((addr & (7ULL<<32)) == (1ULL<<32)) // VCPU_DRAM
     return 1;
   else
-    if ((addr & (2ULL<<32)) == (2ULL<<32)) // IPPU_PRAM
+    if ((addr & (7ULL<<32)) == (2ULL<<32)) // IPPU_PRAM
       return 4;
   else
-    if ((addr & (3ULL<<32)) == (3ULL<<32)) // IPPU_DRAM
+    if ((addr & (7ULL<<32)) == (3ULL<<32)) // IPPU_DRAM
       return 1;
   else
-    if ((addr & (4ULL<<32)) == (4ULL<<32)) // OCRAM_DATA
+    if ((addr & (7ULL<<32)) == (4ULL<<32)) // OCRAM_DATA
       return 1;
-  else    if ((addr & (6ULL<<32)) == (6ULL<<32)) // VCPU_PRAM
-      return 4;
+  else    if ((addr & (7ULL<<32)) == (6ULL<<32)) // VCPU_PRAM
+      return 4;//ORG changed from 4
 
-  return 2;
+  if (memory_unit_size == 1)
+	  return 1;
+  else
+	  return 2;
 }
 
 static int
@@ -937,7 +940,7 @@ gdb_print_insn_vspa (bfd_vma addr, disassemble_info *info)
         if ((info->insn_type == dis_jsr) ||
                 (info->insn_type == dis_branch))
         {
-            CORE_ADDR target_addr = 0x600000000ull | info->target;
+            CORE_ADDR target_addr = 0x600000000ull | info->target; //ORG
             struct bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (target_addr);
             if (msym.minsym != NULL)
              {

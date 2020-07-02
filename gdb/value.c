@@ -3232,7 +3232,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
   else
     {
       /* Plain old data member */
-      offset += (TYPE_FIELD_BITPOS (arg_type, fieldno)
+      offset += (TYPE_FIELD_BITPOS (arg_type, fieldno) //ORG
 	         / (HOST_CHAR_BIT * unit_size2));
 
       /* Lazy register values with offsets are not supported.  */
