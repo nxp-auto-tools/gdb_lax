@@ -940,7 +940,7 @@ gdb_print_insn_vspa (bfd_vma addr, disassemble_info *info)
         if ((info->insn_type == dis_jsr) ||
                 (info->insn_type == dis_branch))
         {
-            CORE_ADDR target_addr = 0x600000000ull | info->target; //ORG
+            CORE_ADDR target_addr = 0x600000000ull | info->target;
             struct bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (target_addr);
             if (msym.minsym != NULL)
              {

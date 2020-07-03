@@ -12569,7 +12569,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       if (handle_data_member_location (die, cu, &offset))
 	SET_FIELD_BITPOS (*fp, offset * bits_per_byte);
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
-      if (attr) //ORG
+      if (attr)
 	{
 	  if (gdbarch_bits_big_endian (gdbarch))
 	    {
