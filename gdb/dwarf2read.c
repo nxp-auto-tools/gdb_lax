@@ -80,13 +80,13 @@ DEF_VEC_P (symbolp);
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
-static unsigned int dwarf_read_debug = 0; //ORG
+static unsigned int dwarf_read_debug = 0;
 
 /* When non-zero, dump DIEs after they are read in.  */
-static unsigned int dwarf_die_debug = 0; //ORG
+static unsigned int dwarf_die_debug = 0;
 
 /* When non-zero, dump line number entries as they are read in.  */
-static unsigned int dwarf_line_debug = 0; //ORG
+static unsigned int dwarf_line_debug = 0;
 
 /* When non-zero, cross-check physname against demangler.  */
 static int check_physname = 0;
@@ -12625,7 +12625,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
       /* Change accessibility for artificial fields (e.g. virtual table
          pointer or virtual base class pointer) to private.  */
-      if (dwarf2_attr (die, DW_AT_artificial, cu)) //ORG 1
+      if (dwarf2_attr (die, DW_AT_artificial, cu))
 	{
 	  FIELD_ARTIFICIAL (*fp) = 1;
 	  new_field->accessibility = DW_ACCESS_private;

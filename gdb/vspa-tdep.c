@@ -857,7 +857,7 @@ vspa_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 static int
 vspa_addressable_memory_unit_size (struct gdbarch *gdbarch)
 {
-  return 1; //ORG
+  return 1;
 }
 
 static int
@@ -875,7 +875,7 @@ vspa3_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR ad
     if ((addr & (7ULL<<32)) == (4ULL<<32)) // OCRAM_DATA
       return 1;
   else    if ((addr & (7ULL<<32)) == (6ULL<<32)) // VCPU_PRAM
-      return 4;//ORG changed from 4
+      return 4;
 
   if (memory_unit_size == 1)
 	  return 1;
