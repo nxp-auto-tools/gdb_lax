@@ -863,21 +863,24 @@ vspa_addressable_memory_unit_size (struct gdbarch *gdbarch)
 static int
 vspa3_adjust_addressable_memory_unit_size (struct gdbarch *gdbarch, CORE_ADDR addr, int memory_unit_size)
 {
-  if ((addr & (1ULL<<32)) == (1ULL<<32)) // VCPU_DRAM
+  if ((addr & (7ULL<<32)) == (1ULL<<32)) // VCPU_DRAM
     return 1;
   else
-    if ((addr & (2ULL<<32)) == (2ULL<<32)) // IPPU_PRAM
+    if ((addr & (7ULL<<32)) == (2ULL<<32)) // IPPU_PRAM
       return 4;
   else
-    if ((addr & (3ULL<<32)) == (3ULL<<32)) // IPPU_DRAM
+    if ((addr & (7ULL<<32)) == (3ULL<<32)) // IPPU_DRAM
       return 1;
   else
-    if ((addr & (4ULL<<32)) == (4ULL<<32)) // OCRAM_DATA
+    if ((addr & (7ULL<<32)) == (4ULL<<32)) // OCRAM_DATA
       return 1;
-  else    if ((addr & (6ULL<<32)) == (6ULL<<32)) // VCPU_PRAM
+  else    if ((addr & (7ULL<<32)) == (6ULL<<32)) // VCPU_PRAM
       return 4;
 
-  return 2;
+  if (memory_unit_size == 1)
+	  return 1;
+  else
+	  return 2;
 }
 
 static int
