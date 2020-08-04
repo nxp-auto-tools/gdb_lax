@@ -488,17 +488,21 @@ value_cast (struct type *type, struct value *arg2)
 
       if(ieee_double) {
         LONGEST lvalue;
+        bool sign = false;
+        if (ieee_double) < 0 {
+            sign = true;
+            ieee_double = -ieee_double;
+        }
         DOUBLEST value = value_as_double (ieee_double);
         int binaryscale = TYPE_BINARYSCALE(type);
 
-        /* shift by the binary scale value */
-        /*while(binaryscale < 0) {
-          binaryscale++;
-          value *= 2;
-        }*/
         while(binaryscale > 0) {
           binaryscale--;
           value *= 2;
+        }
+        
+        if (sign) {
+            value = -value;
         }
         lvalue = value;
 

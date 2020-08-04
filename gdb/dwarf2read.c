@@ -14872,7 +14872,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       if (attr){
           TYPE_BINARYSCALE (type) = DW_SND (attr);
       }else{
-          TYPE_BINARYSCALE (type) = 16;
+          TYPE_BINARYSCALE (type) = 15;
       }
   }
 
