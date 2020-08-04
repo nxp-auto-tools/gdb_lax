@@ -489,7 +489,7 @@ value_cast (struct type *type, struct value *arg2)
       if(ieee_double) {
         LONGEST lvalue;
         bool sign = false;
-        if (ieee_double) < 0 {
+        if (ieee_double < 0) {
             sign = true;
             ieee_double = -ieee_double;
         }
