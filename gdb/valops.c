@@ -489,20 +489,22 @@ value_cast (struct type *type, struct value *arg2)
       if(ieee_double) {
         LONGEST lvalue;
         bool sign = false;
-        if (ieee_double < 0) {
-            sign = true;
-            ieee_double = -ieee_double;
-        }
         DOUBLEST value = value_as_double (ieee_double);
         int binaryscale = TYPE_BINARYSCALE(type);
-
+        
+        if (value < 0){
+            sign = true;
+            value = (-value);
+        }
+        
         while(binaryscale > 0) {
           binaryscale--;
           value *= 2;
         }
         
-        if (sign) {
-            value = -value;
+
+        if (sign){
+            value = value + 0x8000; //sign for short value
         }
         lvalue = value;
 
