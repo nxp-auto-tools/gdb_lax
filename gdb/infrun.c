@@ -6368,6 +6368,13 @@ process_event_stop_test (struct execution_control_state *ecs)
       return;
 
     case BPSTAT_WHAT_SINGLE:
+        if ((stop_pc == ecs->event_thread->control.step_range_end) ||
+        (ecs->event_thread->control.proceed_to_finish == 1 && ecs->event_thread->control.step_over_calls == STEP_OVER_UNDEBUGGABLE)){
+            delete_step_resume_breakpoint (ecs->event_thread);
+            //end_stepping_range (ecs);
+            stop_waiting(ecs);
+            return;
+        }
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SINGLE\n");
       ecs->event_thread->stepping_over_breakpoint = 1;
