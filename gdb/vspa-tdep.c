@@ -194,6 +194,47 @@ vspa_setup_default (struct vspa_unwind_cache *cache)
     cache->reg_saved[i] = -1;
 }
 
+
+/*The LAX hardware used hw callstack with ras and ras_depth reisters instead of regular lr register.
+ * Also it has feature thar ras_depth register updated not when the command been executed but when pc points on it.
+ * To support regular call stack unwinding mechanizm, we should analize our code and if we stay on jsr resgister or on it delay slots, 
+ * remove first ras register from usage and reduce number of available returns*/ 
+static bool
+vspa_skip_frame(struct frame_info *this_frame){
+    bool ret = false;
+    
+    CORE_ADDR current_pc,func_pc;
+    LONGEST insn;
+    LONGEST mask = 0xEFC00000; //jsr opcode mask
+    int i = 3;
+    struct gdbarch *gdbarch = get_frame_arch (this_frame);
+    enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+    
+    func_pc = get_frame_func (this_frame);
+    current_pc = get_frame_pc (this_frame)&~1;
+    
+    while(i>0){
+        insn = read_memory_unsigned_integer (current_pc, 8/*64bit*/, byte_order);
+        insn = (insn >>32) & mask;
+        if (insn == 0x42000000 || insn == 0x42800000 ||
+            insn == 0x43000000 || insn == 0x43800000)
+        {//jsr instruction opcodes
+            ret = true;
+            break;
+        }
+        
+        current_pc -= 2;
+        
+        if (current_pc < func_pc){
+            break;
+        }
+        i = i - 1;
+    }
+    
+    return ret;
+}
+
+
 /* Do a full analysis of the prologue at START_PC and update CACHE accordingly.
    Bail out early if CURRENT_PC is reached.  Returns the address of the first
    instruction after the prologue.  */
@@ -315,11 +356,20 @@ vspa_prev_pc_register(struct frame_info *this_frame)
 {
   CORE_ADDR noFrame;
   int i;
+  static bool skipped;
 
   noFrame = frame_unwind_register_unsigned (this_frame, VSPA_RAS_DEPTH_REGNUM);
   i = frame_relative_level(this_frame);
+  if ((vspa_skip_frame(this_frame) && i == 0) || (skipped && i != 0)){
+       /*if we found skipped frame we must skeep it in whole frame chain*/
+      noFrame--;
+      i++;
+      skipped = true;
+  }else{
+      skipped = false;
+  }
   if ((i >= 0)
-     && (i <= 15) && (i < noFrame))
+     && (i <= 15) && (i <= noFrame))
     {
       CORE_ADDR prev_pc = frame_unwind_register_unsigned (this_frame, VSPA_RAS1_REGNUM + i)*2;
       return frame_unwind_got_constant (this_frame, VSPA_PC_REGNUM, prev_pc);
@@ -393,18 +443,28 @@ vspa_lastframe_this_id (struct frame_info *this_frame,
   return;
 }
 
+
 static int
 vspa_lastframe_sniffer (const struct frame_unwind *self,
 		 struct frame_info *this_frame, void **this_prologue_cache)
 {
   CORE_ADDR noFrame;
   int i;
+  static bool skipped = false;
 
   i = frame_relative_level(this_frame);
   noFrame = get_frame_register_unsigned (this_frame, VSPA_RAS_DEPTH_REGNUM);
+  
+   if ((vspa_skip_frame(this_frame) && i == 0) || (skipped && i != 0)){
+       /*if we found skipped frame we must skeep it in whole frame chain*/
+      noFrame--;
+      skipped = true;
+  }else{
+      skipped = false;
+  }
 
   if ((i >= 0) && (i <= 15) && (i < noFrame))
-    return 0;
+    return 0; //last frame
   else
     return 1;
 }
