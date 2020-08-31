@@ -235,6 +235,22 @@ vspa_skip_frame(struct frame_info *this_frame){
 }
 
 
+static int
+vspa_num_inline_frames(struct frame_info *this_frame){
+    int ret = 0;
+
+    struct frame_info* next = get_next_frame(this_frame);
+    while(next !=NULL && get_frame_type(next) != SENTINEL_FRAME){
+        if (get_frame_type(next) == INLINE_FRAME){
+            ret++;
+        }
+        next = get_next_frame(next);
+    }
+
+    return ret;
+}
+
+
 /* Do a full analysis of the prologue at START_PC and update CACHE accordingly.
    Bail out early if CURRENT_PC is reached.  Returns the address of the first
    instruction after the prologue.  */
@@ -368,8 +384,10 @@ vspa_prev_pc_register(struct frame_info *this_frame)
   }else{
       skipped = false;
   }
-  if ((i >= 0)
-     && (i <= 15) && (i <= noFrame))
+  
+  i -= vspa_num_inline_frames(this_frame);
+  
+  if ((i >= 0) && (i <= 15) && (i <= noFrame))
     {
       CORE_ADDR prev_pc = frame_unwind_register_unsigned (this_frame, VSPA_RAS1_REGNUM + i)*2;
       return frame_unwind_got_constant (this_frame, VSPA_PC_REGNUM, prev_pc);
@@ -462,11 +480,13 @@ vspa_lastframe_sniffer (const struct frame_unwind *self,
   }else{
       skipped = false;
   }
+  
+  i -= vspa_num_inline_frames(this_frame);
 
   if ((i >= 0) && (i <= 15) && (i < noFrame))
-    return 0; //last frame
+    return 0; //recognized
   else
-    return 1;
+    return 1; //unknown
 }
 
 /* VSPA stop unwinder.  */
