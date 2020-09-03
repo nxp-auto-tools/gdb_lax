@@ -17,23 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/*******************************************************************************
- *
- * Copyright 2018-2020 NXP
- *
- * LA_OPT_NXP_Software_License v11 February 2020
- *
- * NXP Confidential. This software is owned or controlled by NXP and may only be
- * used strictly in accordance with the applicable license terms. By expressly
- * accepting such terms or by downloading, installing, activating and/or otherwise
- * using the software, you are agreeing that you have read, and that you agree to
- * comply with and are bound by, such license terms. If you do not agree to be
- * bound by the applicable license terms, then you may not retain, install,
- * activate or otherwise use the software.
- *
- ******************************************************************************/
-
-
 
 #include "defs.h"
 #include "arch-utils.h"
