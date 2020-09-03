@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
@@ -199,9 +200,9 @@ vspa_setup_default (struct vspa_unwind_cache *cache)
  * Also it has feature thar ras_depth register updated not when the command been executed but when pc points on it.
  * To support regular call stack unwinding mechanizm, we should analize our code and if we stay on jsr resgister or on it delay slots, 
  * remove first ras register from usage and reduce number of available returns*/ 
-static bool
+static int
 vspa_skip_frame(struct frame_info *this_frame){
-    bool ret = false;
+    int ret = false;
     
     CORE_ADDR current_pc,func_pc;
     LONGEST insn;
@@ -209,6 +210,12 @@ vspa_skip_frame(struct frame_info *this_frame){
     int i = 3;
     struct gdbarch *gdbarch = get_frame_arch (this_frame);
     enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+    
+    
+    //move till frame level 0
+    while(this_frame != NULL && frame_relative_level(this_frame) != 0){
+        this_frame = get_next_frame(this_frame);
+    }
     
     func_pc = get_frame_func (this_frame);
     current_pc = get_frame_pc (this_frame)&~1;
@@ -219,7 +226,7 @@ vspa_skip_frame(struct frame_info *this_frame){
         if (insn == 0x42000000 || insn == 0x42800000 ||
             insn == 0x43000000 || insn == 0x43800000)
         {//jsr instruction opcodes
-            ret = true;
+            ret = 1;
             break;
         }
         
@@ -231,6 +238,22 @@ vspa_skip_frame(struct frame_info *this_frame){
         i = i - 1;
     }
     
+    return ret;
+}
+
+/*During stack unwinding we may have situation when we have inline frames in call stack, in sucj case we must skip it from the calculation of the ras_depth register*/
+static int
+vspa_num_inline_frames(struct frame_info *this_frame){
+    int ret = 0;
+
+    struct frame_info* next = get_next_frame(this_frame);
+    while(next !=NULL && get_frame_type(next) != SENTINEL_FRAME){
+        if (get_frame_type(next) == INLINE_FRAME){
+            ret++;
+        }
+        next = get_next_frame(next);
+    }
+
     return ret;
 }
 
@@ -354,30 +377,22 @@ vspa_frame_this_id (struct frame_info *this_frame,
 static struct value *
 vspa_prev_pc_register(struct frame_info *this_frame)
 {
-  CORE_ADDR noFrame;
-  int i;
+  CORE_ADDR hw_stack;
+  int frame_level, jsr_stub_frame, num_inline_frames;
   static bool skipped;
 
-  noFrame = frame_unwind_register_unsigned (this_frame, VSPA_RAS_DEPTH_REGNUM);
-  i = frame_relative_level(this_frame);
-  if ((vspa_skip_frame(this_frame) && i == 0) || (skipped && i != 0)){
-       /*if we found skipped frame we must skeep it in whole frame chain*/
-      noFrame--;
-      i++;
-      skipped = true;
-  }else{
-      skipped = false;
-  }
-  if ((i >= 0)
-     && (i <= 15) && (i <= noFrame))
-    {
-      CORE_ADDR prev_pc = frame_unwind_register_unsigned (this_frame, VSPA_RAS1_REGNUM + i)*2;
+  hw_stack = frame_unwind_register_unsigned (this_frame, VSPA_RAS_DEPTH_REGNUM);
+  frame_level = frame_relative_level(this_frame);
+  jsr_stub_frame = vspa_skip_frame(this_frame);
+  num_inline_frames = vspa_num_inline_frames(this_frame);
+  
+  if (frame_level - num_inline_frames>=0 && frame_level - num_inline_frames<=15 && frame_level - num_inline_frames<hw_stack - jsr_stub_frame){
+      CORE_ADDR prev_pc = frame_unwind_register_unsigned (this_frame, VSPA_RAS1_REGNUM + frame_level - num_inline_frames + jsr_stub_frame)*2;
       return frame_unwind_got_constant (this_frame, VSPA_PC_REGNUM, prev_pc);
-    }
-  else
-    {
+  }else{
       return frame_unwind_got_optimized (this_frame, VSPA_PC_REGNUM);
-    }
+  }
+ 
 }
 
 /* Implement the "prev_register" frame_unwind method.  */
@@ -448,25 +463,31 @@ static int
 vspa_lastframe_sniffer (const struct frame_unwind *self,
 		 struct frame_info *this_frame, void **this_prologue_cache)
 {
-  CORE_ADDR noFrame;
-  int i;
-  static bool skipped = false;
+  CORE_ADDR hw_stack;
+  int num_inline_frames,jsr_stub_frame, frame_level;
 
-  i = frame_relative_level(this_frame);
-  noFrame = get_frame_register_unsigned (this_frame, VSPA_RAS_DEPTH_REGNUM);
+  frame_level = frame_relative_level(this_frame);
+  hw_stack = get_frame_register_unsigned (this_frame, VSPA_RAS_DEPTH_REGNUM);
   
-   if ((vspa_skip_frame(this_frame) && i == 0) || (skipped && i != 0)){
-       /*if we found skipped frame we must skeep it in whole frame chain*/
-      noFrame--;
-      skipped = true;
+  num_inline_frames = vspa_num_inline_frames(this_frame);
+  jsr_stub_frame = (hw_stack !=0) ? vspa_skip_frame(this_frame) : 0;//workaround for situation when pc is set by command on jsr instruction.
+  
+  
+  if ( frame_level !=0 && frame_level - num_inline_frames == 0)
+      return 0;//Workaround in other case will crash.
+ 
+  
+  if (num_inline_frames == 0 && jsr_stub_frame == 0){
+      return (frame_level>=0 && frame_level<=15 && frame_level<hw_stack) ? 0 : 1;
+  }else if (num_inline_frames == 0 && jsr_stub_frame == 1){
+      return (frame_level>=0 && frame_level<=15 && frame_level < hw_stack -jsr_stub_frame) ? 0 : 1;
+  }else if (num_inline_frames != 0 && jsr_stub_frame == 0){
+      return (frame_level - num_inline_frames >=0 && frame_level-num_inline_frames <=15 && frame_level - num_inline_frames <= hw_stack) ? 0 : 1;
   }else{
-      skipped = false;
+      return (frame_level - num_inline_frames >=0 && frame_level-num_inline_frames <=15 && frame_level - num_inline_frames <= hw_stack-jsr_stub_frame) ? 0 : 1;
   }
+  
 
-  if ((i >= 0) && (i <= 15) && (i < noFrame))
-    return 0; //last frame
-  else
-    return 1;
 }
 
 /* VSPA stop unwinder.  */
