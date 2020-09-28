@@ -3209,7 +3209,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 
       /* Is this file's first line closer than the first lines of other files?
          If so, record this file, and its first line, as best alternate.  */
-      if (item->pc > pc && (!alt || item->pc < alt->pc))
+      if (item->pc > pc && (!alt || item->pc < alt->pc)) //aici _start are item->line =0
 	alt = item;
 
       for (i = 0; i < len; i++, item++)

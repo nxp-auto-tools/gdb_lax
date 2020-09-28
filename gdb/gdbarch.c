@@ -56,7 +56,7 @@ static void alloc_gdbarch_data (struct gdbarch *);
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG
-#define GDBARCH_DEBUG 0
+#define GDBARCH_DEBUG 2 //ORG
 #endif
 unsigned int gdbarch_debug = GDBARCH_DEBUG;
 static void
