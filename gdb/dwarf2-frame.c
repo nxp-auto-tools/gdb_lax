@@ -1009,7 +1009,7 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 		       const gdb_byte **cfa_start_out,
 		       const gdb_byte **cfa_end_out)
 {
-  struct dwarf2_fde *fde;
+  struct dwarf2_fde *fde; //ORG
   CORE_ADDR text_offset;
   struct dwarf2_frame_state fs;
   int addr_size;

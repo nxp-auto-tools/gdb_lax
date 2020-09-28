@@ -80,13 +80,13 @@ DEF_VEC_P (symbolp);
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
-static unsigned int dwarf_read_debug = 0;
+static unsigned int dwarf_read_debug = 2; //ORG
 
 /* When non-zero, dump DIEs after they are read in.  */
-static unsigned int dwarf_die_debug = 0;
+static unsigned int dwarf_die_debug = 2; //ORG
 
 /* When non-zero, dump line number entries as they are read in.  */
-static unsigned int dwarf_line_debug = 0;
+static unsigned int dwarf_line_debug = 2; //ORG
 
 /* When non-zero, cross-check physname against demangler.  */
 static int check_physname = 0;
@@ -6068,7 +6068,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 
   if (dwarf_read_debug)
     {
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);//ORG pt startup_vspa3 nu trece pe aici
 
       fprintf_unfiltered (gdb_stdlog,
 			  "Psymtab for %s unit @0x%x: %s - %s"
@@ -17722,6 +17722,11 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
 		     unsigned int line, CORE_ADDR address,
 		     record_line_ftype p_record_line)
 {
+  if (line == 0) {
+	  fprintf_unfiltered (gdb_stdlog,
+	  			  "ORG Linia 0");
+	  //return;
+  }
   CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
 
   if (dwarf_line_debug)
