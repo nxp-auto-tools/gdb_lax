@@ -18023,14 +18023,14 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		  {
 		    CORE_ADDR address
 		      = read_address (abfd, line_ptr, cu, &bytes_read);
-
+		    /* Adjusting line address with prefix before checking it against lowpc */
+		    address = gdbarch_adjust_dwarf2_line (gdbarch, address, 0);
 		    line_ptr += bytes_read;
 		    check_line_address (cu, &state_machine, line_ptr,
 					lowpc, address);
 		    state_machine.op_index = 0;
 		    address += baseaddr;
-		    state_machine.address
-		      = gdbarch_adjust_dwarf2_line (gdbarch, address, 0);
+		    state_machine.address = address;
 		  }
 		  break;
 		case DW_LNE_define_file:
