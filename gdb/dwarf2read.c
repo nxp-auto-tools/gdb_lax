@@ -9,7 +9,7 @@
    based on Fred Fish's (Cygnus Support) implementation of DWARF 1
    support.
 
-   This file is part of GDB.d
+   This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
