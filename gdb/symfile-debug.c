@@ -344,7 +344,7 @@ debug_qf_find_pc_sect_compunit_symtab (struct objfile *objfile,
   fprintf_filtered (gdb_stdlog,
 		    "qf->find_pc_sect_compunit_symtab (...) = %s\n",
 		    retval
-		    ? debug_symtab_name (compunit_primary_filetab (retval)) // _start
+		    ? debug_symtab_name (compunit_primary_filetab (retval))
 		    : "NULL");
 
   return retval;

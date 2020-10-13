@@ -262,7 +262,7 @@ frame_stash_invalidate (void)
 
 /* Flag to control debugging.  */
 
-unsigned int frame_debug = 0;
+unsigned int frame_debug;
 static void
 show_frame_debug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)

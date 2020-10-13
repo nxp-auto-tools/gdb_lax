@@ -2965,7 +2965,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	    struct compunit_symtab *result;
 
 	    result
-	      = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, //aici trece init_bss ?
+	      = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile,
 							       msymbol,
 							       pc, section,
 							       0);
@@ -3004,7 +3004,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
     if (!objfile->sf)
       continue;
-    result = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, //aici trece _start
+    result = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile,
 							    msymbol,
 							    pc, section,
 							    1);
@@ -3172,7 +3172,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       }
 
 
-  cust = find_pc_sect_compunit_symtab (pc, section); // pana aici _start e ok
+  cust = find_pc_sect_compunit_symtab (pc, section);
   if (cust == NULL)
     {
       /* If no symbol information, return previous pc.  */
