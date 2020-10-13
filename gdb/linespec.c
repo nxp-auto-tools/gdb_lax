@@ -3595,7 +3595,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 	      struct minimal_symbol *msymbol,
 	      struct symtabs_and_lines *result)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile); //ORG de verificat aici pt init_bss ce val are msysmbol->block, pt start are 0x600000000
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR pc;
   struct symtab_and_line sal;
 

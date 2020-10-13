@@ -48,7 +48,7 @@ struct debug_sym_fns_data
 static const struct objfile_data *symfile_debug_objfile_data_key;
 
 /* If non-zero all calls to the symfile functions are logged.  */
-static int debug_symfile = 1; //ORG
+static int debug_symfile = 0;
 
 /* Return non-zero if symfile debug logging is installed.  */
 
@@ -344,7 +344,7 @@ debug_qf_find_pc_sect_compunit_symtab (struct objfile *objfile,
   fprintf_filtered (gdb_stdlog,
 		    "qf->find_pc_sect_compunit_symtab (...) = %s\n",
 		    retval
-		    ? debug_symtab_name (compunit_primary_filetab (retval))
+		    ? debug_symtab_name (compunit_primary_filetab (retval)) // _start
 		    : "NULL");
 
   return retval;

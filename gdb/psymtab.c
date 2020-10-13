@@ -362,7 +362,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
     if (!pst->psymtabs_addrmap_supported
 	&& pc >= pst->textlow && pc < pst->texthigh)
       {
-	struct partial_symtab *best_pst;
+	struct partial_symtab *best_pst; //ORG aici nu intra _start
 
 	best_pst = find_pc_sect_psymtab_closer (objfile, pc, section, pst,
 						msymbol);

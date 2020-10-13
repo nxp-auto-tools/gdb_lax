@@ -311,7 +311,7 @@ vspa_make_vcpu_ocram_addr(bfd_vma addr)
 }
 
 int
-vspa_vcpu_dram(bfd_vma addr) //ORG
+vspa_vcpu_dram(bfd_vma addr)
 {
   RawMemSpaceInfo* rawMemSpaceInfo = &sRawMemSpaceInfo;
   bfd_vma addr2 = addr & 0xFFFFFFFFULL;

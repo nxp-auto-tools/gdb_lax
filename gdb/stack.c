@@ -107,7 +107,7 @@ static void set_last_displayed_sal (int valid,
    parse.  Two means print similar annotations, but in many more
    cases and in a slightly different syntax.  */
 
-int annotation_level = 2; //ORG
+int annotation_level = 0;
 
 /* These variables hold the last symtab and line we displayed to the user.
  * This is where we insert a breakpoint or a skiplist entry by default.  */

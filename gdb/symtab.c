@@ -2965,7 +2965,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	    struct compunit_symtab *result;
 
 	    result
-	      = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile,
+	      = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, //aici trece init_bss ?
 							       msymbol,
 							       pc, section,
 							       0);
@@ -3004,7 +3004,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
     if (!objfile->sf)
       continue;
-    result = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile,
+    result = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, //aici trece _start
 							    msymbol,
 							    pc, section,
 							    1);
@@ -3172,7 +3172,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       }
 
 
-  cust = find_pc_sect_compunit_symtab (pc, section);
+  cust = find_pc_sect_compunit_symtab (pc, section); // pana aici _start e ok
   if (cust == NULL)
     {
       /* If no symbol information, return previous pc.  */
@@ -3209,7 +3209,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 
       /* Is this file's first line closer than the first lines of other files?
          If so, record this file, and its first line, as best alternate.  */
-      if (item->pc > pc && (!alt || item->pc < alt->pc)) //aici _start are item->line =0
+      if (item->pc > pc && (!alt || item->pc < alt->pc))
 	alt = item;
 
       for (i = 0; i < len; i++, item++)
