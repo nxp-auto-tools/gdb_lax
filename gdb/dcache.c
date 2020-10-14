@@ -131,6 +131,25 @@ void _initialize_dcache (void);
 
 static int dcache_enabled_p = 0; /* OBSOLETE */
 
+static CORE_ADDR mem2cache(CORE_ADDR memaddr)
+{
+    int unit_size = gdbarch_adjust_addressable_memory_unit_size (target_gdbarch (), memaddr,
+        gdbarch_addressable_memory_unit_size (target_gdbarch ()));
+	CORE_ADDR memadr_adj = (memaddr & 0xffffffffUL) * unit_size;
+	CORE_ADDR memadr_pfx = (memaddr & 0xff00000000UL);
+	return (memadr_adj | memadr_pfx);
+}
+
+static CORE_ADDR cache2mem(CORE_ADDR cacheaddr)
+{
+    int unit_size = gdbarch_adjust_addressable_memory_unit_size (target_gdbarch (), cacheaddr,
+        gdbarch_addressable_memory_unit_size (target_gdbarch ()));
+	CORE_ADDR memadr_adj = (cacheaddr & 0xffffffffUL) / unit_size;
+	CORE_ADDR memadr_pfx = (cacheaddr & 0xff00000000UL);
+    return (memadr_adj | memadr_pfx);
+}
+
+
 static void
 show_dcache_enabled_p (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
@@ -335,7 +354,8 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 	  len     -= reg_len;
 	  continue;
 	}
-
+      /*prepare to use target_read_raw_memory, find'em all*/
+      memaddr = cache2mem(memaddr);
       res = target_read_raw_memory (memaddr, myaddr, reg_len);
       if (res != 0)
 	return 0;
@@ -482,22 +502,25 @@ dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
       dcache->ptid = inferior_ptid;
     }
 
+  memaddr = mem2cache(memaddr);
+
   for (i = 0; i < len; i++)
     {
-      if (!dcache_peek_byte (dcache, memaddr + i, myaddr + i))
-	{
-	  /* That failed.  Discard its cache line so we don't have a
+	  if (!dcache_peek_byte (dcache, memaddr + i, myaddr + i))
+	    {
+	     /* That failed.  Discard its cache line so we don't have a
 	     partially read line.  */
-	  dcache_invalidate_line (dcache, memaddr + i);
-	  break;
-	}
+	     dcache_invalidate_line (dcache, memaddr + i);
+	     break;
+	    }
     }
 
   if (i == 0)
     {
       /* Even though reading the whole line failed, we may be able to
 	 read a piece starting where the caller wanted.  */
-      return raw_memory_xfer_partial (ops, myaddr, NULL, memaddr, len,
+	  memaddr = cache2mem(memaddr);
+	  return raw_memory_xfer_partial (ops, myaddr, NULL, memaddr, len,
 				      xfered_len);
     }
   else
@@ -571,7 +594,7 @@ dcache_print_line (DCACHE *dcache, int index)
   db = (struct dcache_block *) n->value;
 
   printf_filtered (_("Line %d: address %s [%d hits]\n"),
-		   index, paddress (target_gdbarch (), db->addr), db->refs);
+		   index, paddress (target_gdbarch (), cache2mem(db->addr)), db->refs);
 
   for (j = 0; j < dcache->line_size; j++)
     {
@@ -631,7 +654,7 @@ dcache_info_1 (DCACHE *dcache, char *exp)
       struct dcache_block *db = (struct dcache_block *) n->value;
 
       printf_filtered (_("Line %d: address %s [%d hits]\n"),
-		       i, paddress (target_gdbarch (), db->addr), db->refs);
+		       i, paddress (target_gdbarch (), cache2mem(db->addr)), db->refs);
       i++;
       refcount += db->refs;
 
