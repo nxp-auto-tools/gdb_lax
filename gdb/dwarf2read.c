@@ -17884,7 +17884,7 @@ check_line_address (struct dwarf2_cu *cu, lnp_state_machine *state,
  *  Here is a fix for the problem.
  * **/
 static int
-lnp_advance_with_filter (int zero_line, int delta, lnp_state_machine *state)
+lnp_advance_with_filter (int zero_line, int delta, lnp_state_machine *state, int file_idx)
 {
 	int zero_line_flag = zero_line;
 	/*if we've got zero lines already - recover from this*/
@@ -17895,6 +17895,9 @@ lnp_advance_with_filter (int zero_line, int delta, lnp_state_machine *state)
 	/*don't move line to zero - leave as is*/
 	if ((state->line + delta) == 0) {
 	   zero_line_flag = 1;
+       if (file_idx != state->file){
+           state->file = file_idx;
+       }
 	} else {
 		/* advance (+/-)delta as normal */
 		state->line += delta;
@@ -17916,6 +17919,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
   const gdb_byte *line_end;
   unsigned int bytes_read, extended_len;
   unsigned char op_code, extended_op;
+  int prev_file = 0;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
@@ -17991,7 +17995,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 					% lh->maximum_ops_per_instruction);
 	      line_delta = lh->line_base + (adj_opcode % lh->line_range);
           /* LAX compiler problem, see same for standard opcodes */
-	      jump_to_zero_flag = lnp_advance_with_filter(jump_to_zero_flag, line_delta, &state_machine);
+	      jump_to_zero_flag = lnp_advance_with_filter(jump_to_zero_flag, line_delta, &state_machine, prev_file);
 
 	      if (line_delta != 0)
 		state_machine.line_has_non_zero_discriminator
@@ -18101,7 +18105,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		int line_delta
 		  = read_signed_leb128 (abfd, line_ptr, &bytes_read);
 		/*LAX compiler issue fix*/
-		jump_to_zero_flag = lnp_advance_with_filter(jump_to_zero_flag, line_delta, &state_machine);
+		jump_to_zero_flag = lnp_advance_with_filter(jump_to_zero_flag, line_delta, &state_machine, prev_file);
 
 		if (line_delta != 0)
 		  state_machine.line_has_non_zero_discriminator
@@ -18116,7 +18120,8 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		   the statement program are 1-based.  */
 		struct file_entry *fe;
 		const char *dir = NULL;
-
+        
+        prev_file = state_machine.file;
 		state_machine.file = read_unsigned_leb128 (abfd, line_ptr,
 							   &bytes_read);
 		line_ptr += bytes_read;
