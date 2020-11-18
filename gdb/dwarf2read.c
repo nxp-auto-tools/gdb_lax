@@ -18081,6 +18081,9 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		}
 	      break;
 	    case DW_LNS_copy:
+          if (jump_to_zero_flag){
+              current_subfile = state_machine.last_subfile;
+          }
 	      dwarf_record_line (&reader_state, &state_machine, 0);
 	      state_machine.discriminator = 0;
 	      break;
@@ -18125,6 +18128,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		state_machine.file = read_unsigned_leb128 (abfd, line_ptr,
 							   &bytes_read);
 		line_ptr += bytes_read;
+        
 		if (state_machine.file == 0
 		    || state_machine.file - 1 >= lh->num_file_names)
 		  dwarf2_debug_line_missing_file_complaint ();
