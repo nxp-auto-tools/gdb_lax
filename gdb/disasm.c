@@ -26,6 +26,8 @@
 #include "dis-asm.h"
 #include "source.h"
 
+#define VCPU	0x0
+#define IPPU	0x1
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
    the same thing: disassemble_command() and the gdbtk variation.  */
@@ -296,6 +298,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
     {
       CORE_ADDR end_pc;
       bfd_byte data;
+      bfd_byte data_p[8];
       int err;
       const char *spacer = "";
 
@@ -307,30 +310,56 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 
       size = disasm_print_insn (gdbarch, pc, di);
 
-      /* For vspa don't read again opcodes */
-      if(di->arch ==  bfd_arch_vspa){
-    	  const bfd_byte* data_p = (const bfd_byte*) di->private_data;
-
-    	  //for IPPU instr just print first byte
-    	  if((pc & 0xf00000000ULL) == 0x200000000ULL){
-    		  data = *data_p;
-    		  fprintf_filtered (opcode_stream, "%s%02x",
-    				  spacer, (unsigned) data);
-    	  }
+      if(di->arch ==  bfd_arch_vspa)
+      {
+    	  int instr_length, processor=0xf;
+    	  if((pc & 0xf00000000ULL) == 0x600000000ULL)
+    	  {
+			  instr_length = 8;
+			  processor = VCPU;
+		  }
     	  else
     	  {
-    		  end_pc = pc + size;
-    		  for (;pc < end_pc; ++pc){
+			  instr_length = 4;
+			  processor = IPPU;
+		  }
 
-    			  if (pc%2)
-    				  data = data_p[4];
-    			  else
-    				  data = *data_p;
+    	  if (processor == VCPU)
+    		  err = (*di->read_memory_func) ((pc - pc % 2), data_p, instr_length, di);
+    	  else
+    	      err = (*di->read_memory_func) (pc, data_p, instr_length, di);
+		  if (err != 0)
+		  {
+			 (*di->memory_error_func) (err, pc, di);
+		     return -1;
+		  }
+    	  bfd_vma data;
+    	  data = bfd_get_bits (data_p, instr_length * 8, di->display_endian == BFD_ENDIAN_BIG);
 
-    			  fprintf_filtered (opcode_stream, "%s%02x",
-    					  spacer, (unsigned) data);
-    			  spacer = " ";
-    		  }
+       	  //VCPU addr
+    	  if(processor == VCPU)
+    	  {
+			  spacer = " ";
+			  if (size==1)
+			  {
+				 if (pc % 2)
+				 {
+					 spacer = "";
+					 fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & data));
+				 }
+				 else
+					 fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & (data>>32)));
+			  }
+			  else
+			  {
+				  spacer = " ";
+				  fprintf_filtered (opcode_stream, "%08lx%s", data, spacer);
+			  }
+    	  }//IPPU addr
+    	  else if(processor == IPPU)
+    	  {
+    		  spacer = "";
+    		  fprintf_filtered (opcode_stream, "%04x%s", data, spacer);
     	  }
       }
       else
@@ -348,7 +377,6 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
       }
       ui_out_field_stream (uiout, "opcodes", opcode_stream);
       ui_out_text (uiout, "\t");
-
       do_cleanups (cleanups);
     }
   else
