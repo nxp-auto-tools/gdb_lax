@@ -300,7 +300,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
       bfd_byte data;
       bfd_byte data_p[8];
       int err;
-      const char *spacer = "";
+      char *spacer = "";
 
       /* Build the opcodes using a temporary stream so we can
 	 write them out in a single go for the MI.  */
