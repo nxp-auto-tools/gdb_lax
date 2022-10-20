@@ -353,7 +353,9 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 			  else
 			  {
 				  spacer = " ";
-				  fprintf_filtered (opcode_stream, "%08lx%s", data, spacer);
+				  fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & (data>>32)));
+				  fprintf_filtered (opcode_stream, "%04x%s", (0xFFFFFFFFUL & data), spacer);
+				  //fprintf_filtered (opcode_stream, "%08lx%s", data, spacer);
 			  }
     	  }//IPPU addr
     	  else if(processor == IPPU)
