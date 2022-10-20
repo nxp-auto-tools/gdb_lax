@@ -300,7 +300,7 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
       bfd_byte data;
       bfd_byte data_p[8];
       int err;
-      const char *spacer = "";
+      char *spacer = "";
 
       /* Build the opcodes using a temporary stream so we can
 	 write them out in a single go for the MI.  */
@@ -339,31 +339,27 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
        	  //VCPU addr
     	  if(processor == VCPU)
     	  {
-			  spacer = " ";
 			  if (size==1)
 			  {
 				 if (pc % 2)
-				 {
-					 spacer = "";
 					 fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & data));
-				 }
+
 				 else
 					 fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & (data>>32)));
 			  }
 			  else
 			  {
-				  spacer = " ";
-				  fprintf_filtered (opcode_stream, "%08lx%s", data, spacer);
+				  fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & (data>>32)));
+				  fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & data));
 			  }
     	  }//IPPU addr
     	  else if(processor == IPPU)
-    	  {
-    		  spacer = "";
-    		  fprintf_filtered (opcode_stream, "%04x%s", data, spacer);
-    	  }
+
+    		  fprintf_filtered (opcode_stream, "%04x", data);
       }
       else
       {
+    	  spacer = " ";
           end_pc = pc + size;
           for (;pc < end_pc; ++pc)
           {
