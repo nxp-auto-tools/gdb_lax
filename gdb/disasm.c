@@ -354,14 +354,16 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
 			  {
 				  spacer = " ";
 				  fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & (data>>32)));
-				  fprintf_filtered (opcode_stream, "%04x%s", (0xFFFFFFFFUL & data), spacer);
+				  fprintf_filtered (opcode_stream, "%04x", (0xFFFFFFFFUL & data));
+				  //fprintf_filtered (opcode_stream, "%04x%s", (0xFFFFFFFFUL & data), spacer);
 				  //fprintf_filtered (opcode_stream, "%08lx%s", data, spacer);
 			  }
     	  }//IPPU addr
     	  else if(processor == IPPU)
     	  {
     		  spacer = "";
-    		  fprintf_filtered (opcode_stream, "%04x%s", data, spacer);
+    		  fprintf_filtered (opcode_stream, "%04x", data);
+    		  //fprintf_filtered (opcode_stream, "%04x%s", data, spacer);
     	  }
       }
       else
