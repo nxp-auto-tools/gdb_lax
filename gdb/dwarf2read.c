@@ -12607,7 +12607,18 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		     bit field.  */
 		  anonymous_size = TYPE_LENGTH (fp->type);
 		}
-	      SET_FIELD_BITPOS (*fp,
+		/* we make a workaround for compiler that generates bit offset relative to the 32 bits.
+		   We adjust the bit offset to be relative to the object size.
+		*/
+		if (anonymous_size * bits_per_byte < bit_offset + FIELD_BITSIZE (*fp))
+		{
+		  int bit_offset_adjust = (anonymous_size * bits_per_byte) - (32 - bit_offset) ;
+		  if (anonymous_size * bits_per_byte >= bit_offset_adjust + FIELD_BITSIZE (*fp))
+		  {
+		    bit_offset = bit_offset_adjust;
+		  }
+		}
+		SET_FIELD_BITPOS (*fp,
 				(FIELD_BITPOS (*fp)
 				 + anonymous_size * bits_per_byte
 				 - bit_offset - FIELD_BITSIZE (*fp)));
