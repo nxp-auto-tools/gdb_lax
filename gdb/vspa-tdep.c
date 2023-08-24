@@ -847,7 +847,6 @@ vspa_pointer_to_address (struct gdbarch *gdbarch,
   CORE_ADDR addr
     = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
-  addr &= 0xFFFFFFFFULL;
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
 	|| TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD
@@ -1157,8 +1156,8 @@ vspa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_adjust_dwarf2_addr (gdbarch, vspa1_adjust_dwarf2_addr);
     set_gdbarch_adjust_dwarf2_line (gdbarch, vspa1_adjust_dwarf2_line);
   }
-  set_gdbarch_addr_bit (gdbarch, 40);
-  set_gdbarch_ptr_bit (gdbarch, 40);
+  set_gdbarch_addr_bit (gdbarch, 36);
+  set_gdbarch_ptr_bit (gdbarch, 36);
   set_gdbarch_dwarf2_addr_size (gdbarch, 4);
 
   /* Register info */
